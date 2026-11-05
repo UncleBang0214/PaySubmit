@@ -25,7 +25,9 @@ defineProps<{ result: ActionResult }>();
         <dd>{{ item.value }}</dd>
       </template>
     </dl>
-    <p v-else-if="!result.message" class="result-empty">未获取到可展示的返回信息</p>
+    <p v-else-if="!result.message" class="result-empty">
+      未获取到可展示的返回信息（HTTP {{ result.status }}）
+    </p>
   </section>
 </template>
 
