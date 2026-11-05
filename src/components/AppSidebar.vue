@@ -16,9 +16,9 @@ const icons: Record<ModuleDefinition["icon"], Component> = {
 
 <template>
   <aside class="sidebar">
-    <div class="brand" aria-label="支付提交器">
+    <div class="brand" aria-label="支付提交工具">
       <span class="brand-mark">P</span>
-      <span class="brand-name"><strong>支付提交器</strong><small>PAYSUBMIT</small></span>
+      <span class="brand-name"><strong>支付提交工具</strong><small>PAYSUBMIT</small></span>
     </div>
 
     <nav class="navigation" aria-label="功能导航">

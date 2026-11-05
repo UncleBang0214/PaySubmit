@@ -1,6 +1,6 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "PaySubmit",
+  "productName": "支付提交工具",
   "version": "0.1.0",
   "identifier": "com.paysubmit.app",
   "build": {
@@ -13,7 +13,7 @@
     "windows": [
       {
         "label": "main",
-        "title": "支付提交器",
+        "title": "支付提交工具",
         "width": 1200,
         "height": 750,
         "minWidth": 1000,

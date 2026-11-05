@@ -1,4 +1,4 @@
-# PaySubmit · 支付提交器
+# PaySubmit · 支付提交工具
 
 [![CI](https://github.com/UncleBang0214/PaySubmit/actions/workflows/ci.yml/badge.svg?branch=Rust)](https://github.com/UncleBang0214/PaySubmit/actions/workflows/ci.yml)
 [![License: Apache-2.0](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](./LICENSE)

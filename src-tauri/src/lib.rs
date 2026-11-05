@@ -23,7 +23,7 @@ pub fn run() {
                     .map_err(|_| "无法获取当前Windows用户的应用配置目录".to_string()),
             ));
             if let Some(window) = app.get_webview_window("main") {
-                let _ = window.set_title("支付提交器");
+                let _ = window.set_title("支付提交工具");
             }
             Ok(())
         })
