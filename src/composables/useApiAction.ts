@@ -22,6 +22,8 @@ export interface ActionResult {
   retCode: string;
   message: string;
   items: ResultItem[];
+  /** 服务器原始响应正文，仅在结果卡展开查看，便于排查。 */
+  rawBody: string;
 }
 
 // 余额查询：只展示用户关心的关键字段，避免暴露技术细节。
@@ -127,5 +129,5 @@ export async function runApiAction(
     items.push({ label, value });
   }
 
-  return { ok, status: raw.response.status, retCode, message, items };
+  return { ok, status: raw.response.status, retCode, message, items, rawBody: raw.response.body };
 }

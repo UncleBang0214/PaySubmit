@@ -28,6 +28,11 @@ defineProps<{ result: ActionResult }>();
     <p v-else-if="!result.message" class="result-empty">
       未获取到可展示的返回信息（HTTP {{ result.status }}）
     </p>
+
+    <details v-if="result.rawBody" class="raw-toggle">
+      <summary>查看原始响应</summary>
+      <pre class="raw-body">{{ result.rawBody }}</pre>
+    </details>
   </section>
 </template>
 
@@ -105,5 +110,29 @@ defineProps<{ result: ActionResult }>();
   margin: 0;
   color: var(--text-faint);
   font-size: 13px;
+}
+.raw-toggle {
+  border-top: 1px dashed var(--border);
+  padding-top: 10px;
+}
+.raw-toggle summary {
+  color: var(--text-muted);
+  font-size: 12px;
+  cursor: pointer;
+  user-select: none;
+}
+.raw-body {
+  max-height: 240px;
+  overflow: auto;
+  margin: 10px 0 0;
+  border-radius: 6px;
+  padding: 10px;
+  background: var(--surface);
+  color: var(--text-muted);
+  font-family: var(--font-code);
+  font-size: 11.5px;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  word-break: break-all;
 }
 </style>
