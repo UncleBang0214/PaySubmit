@@ -152,6 +152,62 @@
           ]
         }
       ]
+    },
+    {
+      "id": "MerchantAccountQuery",
+      "name": "余额查询",
+      "interfaces": [
+        {
+          "id": "merchantaccountquery.md5.main",
+          "name": "main",
+          "function": "main",
+          "request_type": "MerchantAccountQueryReq",
+          "variant": "md5",
+          "protocol": "form_md5_fields",
+          "endpoint": "http://pay.trx.helipay.com/trx/merchant/interface.action",
+          "content_type": "form",
+          "response_sign_fields": [
+            "rt1_bizType",
+            "rt2_retCode",
+            "rt3_retMsg",
+            "rt4_customerNumber",
+            "rt5_accountStatus",
+            "rt6_balance",
+            "rt7_frozenBalance",
+            "rt8_d0Balance",
+            "rt9_T1Balance",
+            "rt10_currency",
+            "rt11_createDate",
+            "rt12_desc"
+          ],
+          "fields": [
+            {
+              "name": "P1_bizType",
+              "kind": "string",
+              "default": "MerchantAccountQuery",
+              "sign": true,
+              "encrypt": false,
+              "omit_empty": false
+            },
+            {
+              "name": "P2_customerNumber",
+              "kind": "string",
+              "default": "{{customer_number}}",
+              "sign": true,
+              "encrypt": false,
+              "omit_empty": false
+            },
+            {
+              "name": "P3_timestamp",
+              "kind": "string",
+              "default": "{{timestamp}}",
+              "sign": true,
+              "encrypt": false,
+              "omit_empty": false
+            }
+          ]
+        }
+      ]
     }
   ]
 }

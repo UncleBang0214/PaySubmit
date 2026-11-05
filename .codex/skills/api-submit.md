@@ -24,6 +24,23 @@
 | `settings.api.save` | 保存本地密钥（值不回显） |
 | `app.exit` | 退出应用（用于启动同意书“拒绝并退出”，不涉及业务数据） |
 
+## 内置接口
+
+| 产品 | 接口 | 协议 | 所需密钥 |
+|---|---|---|---|
+| `MerchantSettlement` 商户结算 | 结算申请 / 结算查询 | `form_sm_sign`（SM2 签名） | 商户 SM2 私钥 + 平台 SM2 公钥 |
+| `MerchantAccountQuery` 余额查询 | 账户余额查询 | `form_md5_fields`（MD5 + 3DES） | MD5 签名密钥（如字段需加密再填 3DES 密钥） |
+
+余额查询请求字段：`P1_bizType=MerchantAccountQuery`、`P2_customerNumber`、`P3_timestamp`；
+响应关键字段：`rt5_accountStatus`、`rt6_balance`、`rt7_frozenBalance`、`rt8_d0Balance`、`rt9_T1Balance`、`rt10_currency`。
+
+新增渠道接口时，必须同时确认：
+
+1. `feature_api_settings.rs::credential_route` 的产品白名单已包含该产品 ID；
+2. 协议名与 `feature_api_protocol.rs::prepare_request` 的分支一致；
+3. 请求字段的 `sign` / `encrypt` 标记与渠道签名规则一致；
+4. 为该接口补充成功与失败响应用例。
+
 ## 安全约束
 
 - 协议组装、签名与加密只在 Rust 侧完成，前端永不接触签名密钥明文。
