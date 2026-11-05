@@ -17,7 +17,7 @@
   --sidebar-mark: #cb3931;
   --sidebar-mark-text: #ffffff;
   --sidebar-mark-border: #b9322b;
-  --sidebar-scrollbar: rgba(112, 116, 126, .24);
+  --sidebar-scrollbar: rgba(112, 116, 126, 0.24);
   --text: #292d34;
   --text-muted: #6f7580;
   --text-faint: #9ba0a9;
@@ -36,12 +36,12 @@
   --warning-soft: #fff6e5;
   --danger: #c23832;
   --danger-soft: #fff0ef;
-  --focus: rgba(203, 57, 49, .18);
+  --focus: rgba(203, 57, 49, 0.18);
   --log-tag: #0f766e;
   --log-debug: #7c3aed;
-  --shadow-surface: 0 1px 2px rgba(23, 28, 38, .04), 0 8px 24px rgba(23, 28, 38, .045);
-  --shadow-raised: 0 10px 28px rgba(23, 28, 38, .12);
-  --shadow-dialog: 0 24px 64px rgba(18, 22, 30, .22);
+  --shadow-surface: 0 1px 2px rgba(23, 28, 38, 0.04), 0 8px 24px rgba(23, 28, 38, 0.045);
+  --shadow-raised: 0 10px 28px rgba(23, 28, 38, 0.12);
+  --shadow-dialog: 0 24px 64px rgba(18, 22, 30, 0.22);
 }
 
 :root[data-theme="dark"] {
@@ -61,7 +61,7 @@
   --sidebar-mark: #d84a43;
   --sidebar-mark-text: #ffffff;
   --sidebar-mark-border: #ee6b64;
-  --sidebar-scrollbar: rgba(166, 169, 178, .25);
+  --sidebar-scrollbar: rgba(166, 169, 178, 0.25);
   --text: #f2f3f5;
   --text-muted: #b0b3bc;
   --text-faint: #81858f;
@@ -80,10 +80,10 @@
   --warning-soft: #40341f;
   --danger: #f18480;
   --danger-soft: #482927;
-  --focus: rgba(239, 102, 95, .22);
+  --focus: rgba(239, 102, 95, 0.22);
   --log-tag: #5eead4;
   --log-debug: #c4b5fd;
-  --shadow-surface: 0 1px 2px rgba(0, 0, 0, .18), 0 10px 26px rgba(0, 0, 0, .12);
-  --shadow-raised: 0 12px 30px rgba(0, 0, 0, .3);
-  --shadow-dialog: 0 26px 68px rgba(0, 0, 0, .5);
+  --shadow-surface: 0 1px 2px rgba(0, 0, 0, 0.18), 0 10px 26px rgba(0, 0, 0, 0.12);
+  --shadow-raised: 0 12px 30px rgba(0, 0, 0, 0.3);
+  --shadow-dialog: 0 26px 68px rgba(0, 0, 0, 0.5);
 }

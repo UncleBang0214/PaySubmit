@@ -6,8 +6,8 @@
 
 请通过以下方式私下联系维护者：
 
-- 仓库 Issue 页面中标注的维护者邮箱，或
-- 在 GitHub 使用 “Report a vulnerability”（Security Advisories）私密通道。
+- 在 GitHub 使用 **Report a vulnerability**（[Security Advisories](https://github.com/UncleBang0214/PaySubmit/security/advisories/new)）私密通道；
+- 或通过仓库维护者在 GitHub 主页公开的联系方式私下联系。
 
 请尽量提供：
 

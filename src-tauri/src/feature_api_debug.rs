@@ -397,4 +397,3 @@ fn resolve_templates(value: &str, customer_number: &str) -> String {
 const fn default_timeout_seconds() -> u64 {
     DEFAULT_TIMEOUT_SECONDS
 }
-

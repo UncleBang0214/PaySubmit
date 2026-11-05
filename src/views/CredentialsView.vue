@@ -3,8 +3,14 @@ import { computed, onMounted, reactive, ref } from "vue";
 import { KeyRound, LoaderCircle, Save } from "lucide-vue-next";
 
 import SelectControl from "../components/SelectControl.vue";
-import { credentialFields, loadApiCatalog, ensureSettings, saveApiChanges, useSettings } from "../composables/useSettings";
-import type { ApiCatalog, ApiCombo, ApiDomain, CredentialChanges, CredentialField } from "../composables/useSettings";
+import { loadApiCatalog, saveApiChanges, useSettings } from "../composables/useSettings";
+import type {
+  ApiCatalog,
+  ApiCombo,
+  ApiDomain,
+  CredentialChanges,
+  CredentialField,
+} from "../composables/useSettings";
 import { useUi } from "../composables/useUi";
 import { errorMessage } from "../utils";
 
@@ -30,12 +36,25 @@ const drafts = reactive<Partial<Record<CredentialField, string>>>({});
 const busy = ref(false);
 const loadingCatalog = ref(true);
 
-const domainOptions = computed(() => catalog.value.domains.map((item) => ({ value: item.id, label: item.name })));
-const currentDomain = computed(() => catalog.value.domains.find((item) => item.id === domain.value));
-const comboOptions = computed(() => (currentDomain.value?.combos ?? []).map((item) => ({ value: item.id, label: item.name })));
-const currentCombo = computed(() => currentDomain.value?.combos.find((item) => item.id === combo.value));
-const productOptions = computed(() => (currentCombo.value?.products ?? []).map((item) => ({ value: item.id, label: item.name })));
-const fields = computed<CredentialField[]>(() => ["customer_number", ...(currentCombo.value?.fields ?? [])]);
+const domainOptions = computed(() =>
+  catalog.value.domains.map((item) => ({ value: item.id, label: item.name })),
+);
+const currentDomain = computed(() =>
+  catalog.value.domains.find((item) => item.id === domain.value),
+);
+const comboOptions = computed(() =>
+  (currentDomain.value?.combos ?? []).map((item) => ({ value: item.id, label: item.name })),
+);
+const currentCombo = computed(() =>
+  currentDomain.value?.combos.find((item) => item.id === combo.value),
+);
+const productOptions = computed(() =>
+  (currentCombo.value?.products ?? []).map((item) => ({ value: item.id, label: item.name })),
+);
+const fields = computed<CredentialField[]>(() => [
+  "customer_number",
+  ...(currentCombo.value?.fields ?? []),
+]);
 const scope = computed(() => (combo.value === "sm" ? domain.value : product.value));
 
 onMounted(async () => {
@@ -51,14 +70,6 @@ onMounted(async () => {
     loadingCatalog.value = false;
   }
 });
-
-function syncProduct() {
-  const first = comboOptions.value[0];
-  if (!comboOptions.value.some((option) => option.value === combo.value)) {
-    combo.value = (first?.value as ApiCombo) ?? combo.value;
-  }
-  product.value = productOptions.value[0]?.value ?? "";
-}
 
 async function save() {
   const changes: CredentialChanges = {};
@@ -76,7 +87,13 @@ async function save() {
   }
   busy.value = true;
   try {
-    await saveApiChanges(domain.value, combo.value, scope.value, changes, snapshot.value?.revision ?? 0);
+    await saveApiChanges(
+      domain.value,
+      combo.value,
+      scope.value,
+      changes,
+      snapshot.value?.revision ?? 0,
+    );
     for (const field of fields.value) delete drafts[field];
     notify("本地密钥已加密保存");
   } catch (error) {
@@ -90,17 +107,54 @@ async function save() {
 <template>
   <div class="tool-surface credentials-pane">
     <header class="surface-header">
-      <div class="section-title"><KeyRound :size="18" /><div><h2>本地密钥</h2><span>仅保存在本机，加密存储，不回显明文</span></div></div>
+      <div class="section-title">
+        <KeyRound :size="18" />
+        <div>
+          <h2>本地密钥</h2>
+          <span>仅保存在本机，加密存储，不回显明文</span>
+        </div>
+      </div>
     </header>
 
     <div class="credentials-body">
-      <div class="field"><span>业务域</span><SelectControl v-model="domain" :options="domainOptions" aria-label="业务域" :disabled="busy || loadingCatalog" /></div>
-      <div class="field"><span>签名组合</span><SelectControl v-model="combo" :options="comboOptions" aria-label="签名组合" :disabled="busy || loadingCatalog" /></div>
-      <div class="field"><span>产品</span><SelectControl v-model="product" :options="productOptions" aria-label="产品" :disabled="busy || loadingCatalog" /></div>
+      <div class="field">
+        <span>业务域</span
+        ><SelectControl
+          v-model="domain"
+          :options="domainOptions"
+          aria-label="业务域"
+          :disabled="busy || loadingCatalog"
+        />
+      </div>
+      <div class="field">
+        <span>签名组合</span
+        ><SelectControl
+          v-model="combo"
+          :options="comboOptions"
+          aria-label="签名组合"
+          :disabled="busy || loadingCatalog"
+        />
+      </div>
+      <div class="field">
+        <span>产品</span
+        ><SelectControl
+          v-model="product"
+          :options="productOptions"
+          aria-label="产品"
+          :disabled="busy || loadingCatalog"
+        />
+      </div>
 
       <label v-for="field in fields" :key="field" class="field">
         <span>{{ fieldLabels[field] }}</span>
-        <input v-model="drafts[field]" :type="field === 'customer_number' ? 'text' : 'password'" autocomplete="off" spellcheck="false" :disabled="busy" :placeholder="field === 'customer_number' ? '留空表示不修改' : '留空表示不修改'" />
+        <input
+          v-model="drafts[field]"
+          :type="field === 'customer_number' ? 'text' : 'password'"
+          autocomplete="off"
+          spellcheck="false"
+          :disabled="busy"
+          :placeholder="field === 'customer_number' ? '留空表示不修改' : '留空表示不修改'"
+        />
       </label>
     </div>
 

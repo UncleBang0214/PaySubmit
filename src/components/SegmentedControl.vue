@@ -16,6 +16,8 @@ defineEmits<{ "update:modelValue": [value: string] }>();
       :class="{ active: modelValue === option.value }"
       :aria-pressed="modelValue === option.value"
       @click="$emit('update:modelValue', option.value)"
-    >{{ option.label }}</button>
+    >
+      {{ option.label }}
+    </button>
   </div>
 </template>

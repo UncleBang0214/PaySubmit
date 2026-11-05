@@ -327,8 +327,6 @@ where
     BTreeMap::deserialize(deserializer).map(Some)
 }
 
-
-
 #[derive(Clone, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 struct DiskScope {
@@ -622,8 +620,6 @@ impl SettingsStore {
         Ok(inner.settings.snapshot())
     }
 
-
-
     /// Active execution is deliberately disjoint: non-SM reads only its concrete
     /// product, while SM reads only the selected domain's shared scope.
     pub(crate) fn effective_api_credentials(
@@ -874,11 +870,6 @@ fn validate_field(field: Field, value: &str) -> Result<(), String> {
     crate::feature_api_crypto::validate_credential_field(field.name(), value)
         .map_err(|reason| format!("{}：{reason}", field.label()))
 }
-
-
-
-
-
 
 fn next_revision(revision: u64) -> Result<u64, String> {
     revision
@@ -1188,10 +1179,6 @@ where
     }
     Ok(scope)
 }
-
-
-
-
 
 fn entropy(scope: &str, field: Field) -> Vec<u8> {
     // Bind ciphertext to its schema, exact scope, and field. A ciphertext cannot
@@ -1503,7 +1490,10 @@ mod tests {
             }))
             .unwrap();
         assert_eq!(saved["products"]["ATUPay"]["customer_number"], "C0001");
-        assert_eq!(saved["products"]["ATUPay"]["combos"]["des_md5"]["md5_key"], true);
+        assert_eq!(
+            saved["products"]["ATUPay"]["combos"]["des_md5"]["md5_key"],
+            true
+        );
         assert!(!saved.to_string().contains("SYNTHETIC-SECRET"));
         drop(store);
 

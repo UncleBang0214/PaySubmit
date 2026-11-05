@@ -7,17 +7,20 @@ export interface SelectOption {
   label: string;
 }
 
-const props = withDefaults(defineProps<{
-  modelValue: string;
-  options: SelectOption[];
-  placeholder?: string;
-  ariaLabel?: string;
-  disabled?: boolean;
-}>(), {
-  placeholder: "请选择",
-  ariaLabel: "选择选项",
-  disabled: false,
-});
+const props = withDefaults(
+  defineProps<{
+    modelValue: string;
+    options: SelectOption[];
+    placeholder?: string;
+    ariaLabel?: string;
+    disabled?: boolean;
+  }>(),
+  {
+    placeholder: "请选择",
+    ariaLabel: "选择选项",
+    disabled: false,
+  },
+);
 
 const emit = defineEmits<{ "update:modelValue": [value: string] }>();
 const root = ref<HTMLElement | null>(null);
@@ -25,10 +28,14 @@ const trigger = ref<HTMLButtonElement | null>(null);
 const open = ref(false);
 const openUpward = ref(false);
 const activeIndex = ref(0);
-const selectedOption = computed(() => props.options.find((option) => option.value === props.modelValue));
+const selectedOption = computed(() =>
+  props.options.find((option) => option.value === props.modelValue),
+);
 
 function optionButtons() {
-  return Array.from(root.value?.querySelectorAll<HTMLButtonElement>(".select-control-option") ?? []);
+  return Array.from(
+    root.value?.querySelectorAll<HTMLButtonElement>(".select-control-option") ?? [],
+  );
 }
 
 async function focusOption(index: number) {
@@ -43,7 +50,9 @@ async function openMenu(focusSelected = false) {
   activeIndex.value = selectedIndex >= 0 ? selectedIndex : 0;
   const rect = root.value?.getBoundingClientRect();
   const menuHeight = Math.min(props.options.length * 38 + 10, 270);
-  openUpward.value = Boolean(rect && rect.bottom + menuHeight > window.innerHeight - 16 && rect.top > menuHeight);
+  openUpward.value = Boolean(
+    rect && rect.bottom + menuHeight > window.innerHeight - 16 && rect.top > menuHeight,
+  );
   open.value = true;
   if (focusSelected) {
     await focusOption(activeIndex.value);
@@ -69,7 +78,7 @@ function choose(value: string) {
 }
 
 function handleTriggerKeydown(event: KeyboardEvent) {
-  if (!['ArrowDown', 'ArrowUp'].includes(event.key)) return;
+  if (!["ArrowDown", "ArrowUp"].includes(event.key)) return;
   event.preventDefault();
   void openMenu(true);
 }
@@ -125,7 +134,9 @@ onBeforeUnmount(() => {
       @click="toggle"
       @keydown="handleTriggerKeydown"
     >
-      <span :class="{ placeholder: !selectedOption }">{{ selectedOption?.label ?? placeholder }}</span>
+      <span :class="{ placeholder: !selectedOption }">{{
+        selectedOption?.label ?? placeholder
+      }}</span>
       <ChevronDown :size="16" class="select-control-chevron" />
     </button>
     <div v-if="open" class="select-control-menu" role="listbox">

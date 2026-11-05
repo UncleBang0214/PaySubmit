@@ -5,13 +5,23 @@ import { rpc } from "../rpc";
 import { errorMessage } from "../utils";
 
 export const credentialFields = [
-  "customer_number", "md5_key", "sha256_key", "triple_des_key", "aes_key",
-  "rsa_private_key", "rsa_public_key", "sm2_private_key", "sm2_public_key",
+  "customer_number",
+  "md5_key",
+  "sha256_key",
+  "triple_des_key",
+  "aes_key",
+  "rsa_private_key",
+  "rsa_public_key",
+  "sm2_private_key",
+  "sm2_public_key",
 ] as const;
 
-export type CredentialField = typeof credentialFields[number];
+export type CredentialField = (typeof credentialFields)[number];
 export type CredentialChanges = Partial<Record<CredentialField, string | null>>;
-export type CredentialSummary = { customer_number: string | null } & Record<Exclude<CredentialField, "customer_number">, boolean>;
+export type CredentialSummary = { customer_number: string | null } & Record<
+  Exclude<CredentialField, "customer_number">,
+  boolean
+>;
 export type ApiDomain = "domestic" | "cross_border";
 export type ApiCombo = "des_md5" | "des_sha256" | "sm" | "rsa_aes" | "aes_sha256";
 export type ApiSecretField = Exclude<CredentialField, "customer_number">;
@@ -79,7 +89,10 @@ export async function loadApiCatalog(): Promise<ApiCatalog> {
   return rpc<ApiCatalog>("settings.api.catalog");
 }
 
-async function writeSettings(action: string, params: Record<string, unknown>): Promise<SettingsSnapshot> {
+async function writeSettings(
+  action: string,
+  params: Record<string, unknown>,
+): Promise<SettingsSnapshot> {
   requireDesktop();
   await ensureSettings();
   if (saving.value) throw new Error("另一项密钥正在保存，请等待完成");
@@ -93,7 +106,13 @@ async function writeSettings(action: string, params: Record<string, unknown>): P
   }
 }
 
-export async function saveApiChanges(domain: ApiDomain, combo: ApiCombo, scope: string, changes: CredentialChanges, revision: number): Promise<SettingsSnapshot> {
+export async function saveApiChanges(
+  domain: ApiDomain,
+  combo: ApiCombo,
+  scope: string,
+  changes: CredentialChanges,
+  revision: number,
+): Promise<SettingsSnapshot> {
   return writeSettings("settings.api.save", { revision, domain, combo, scope, changes });
 }
 

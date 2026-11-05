@@ -5,7 +5,7 @@
 ## 提交前
 
 1. 先开 Issue 讨论改动方向，避免重复劳动。
-2. 从 `main` 分支切出特性分支。
+2. 从 `Rust` 分支切出特性分支。
 3. 保证 `npm run build` 与 `cargo test --manifest-path src-tauri/Cargo.toml` 通过。
 4. 新增功能需附带测试；测试只使用**合成假数据**。
 

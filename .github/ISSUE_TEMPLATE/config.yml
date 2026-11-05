@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 报告安全漏洞
+    url: https://github.com/UncleBang0214/PaySubmit/security/advisories/new
+    about: 请勿通过公开 Issue 报告安全漏洞，请使用 GitHub Security Advisories 私密渠道。
+  - name: 阅读免责声明与资金风险提示
+    url: https://github.com/UncleBang0214/PaySubmit/blob/Rust/DISCLAIMER.md
+    about: 在提交真实资金请求前，请先阅读免责声明与风险提示。
+  - name: 阅读贡献指南
+    url: https://github.com/UncleBang0214/PaySubmit/blob/Rust/CONTRIBUTING.md
+    about: 了解 DCO 签名、测试与禁止提交真实密钥等约定。

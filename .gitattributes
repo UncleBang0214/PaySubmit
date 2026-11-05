@@ -1,0 +1,29 @@
+# 统一使用 LF 换行，避免 Windows/Linux 协作产生无意义差异
+* text=auto eol=lf
+
+*.rs       text eol=lf
+*.ts       text eol=lf
+*.vue      text eol=lf
+*.js       text eol=lf
+*.json     text eol=lf
+*.md       text eol=lf
+*.yml      text eol=lf
+*.yaml     text eol=lf
+*.toml     text eol=lf
+*.css      text eol=lf
+*.html     text eol=lf
+
+# 二进制文件不做换行转换
+*.png   binary
+*.jpg   binary
+*.jpeg  binary
+*.gif   binary
+*.webp  binary
+*.ico   binary
+*.exe   binary
+*.dll   binary
+*.msi   binary
+
+# 锁文件按生成物对待，不参与语言统计
+package-lock.json linguist-generated=true
+src-tauri/Cargo.lock linguist-generated=true

@@ -40,7 +40,12 @@ const icons: Record<ModuleDefinition["icon"], Component> = {
     </nav>
 
     <div class="sidebar-footer">
-      <button type="button" class="theme-control" :title="dark ? '切换至浅色模式' : '切换至深色模式'" @click="emit('toggleTheme')">
+      <button
+        type="button"
+        class="theme-control"
+        :title="dark ? '切换至浅色模式' : '切换至深色模式'"
+        @click="emit('toggleTheme')"
+      >
         <Sun v-if="dark" :size="16" />
         <Moon v-else :size="16" />
         <span>{{ dark ? "浅色模式" : "深色模式" }}</span>

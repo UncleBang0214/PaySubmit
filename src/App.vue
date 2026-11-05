@@ -25,16 +25,25 @@ const currentModule = computed<ModuleDefinition>(
 );
 const currentView = computed(() => views[active.value]);
 
-watch(dark, (value) => {
-  document.documentElement.dataset.theme = value ? "dark" : "light";
-  document.documentElement.style.colorScheme = value ? "dark" : "light";
-  localStorage.setItem("paysubmit-theme", value ? "dark" : "light");
-}, { immediate: true });
+watch(
+  dark,
+  (value) => {
+    document.documentElement.dataset.theme = value ? "dark" : "light";
+    document.documentElement.style.colorScheme = value ? "dark" : "light";
+    localStorage.setItem("paysubmit-theme", value ? "dark" : "light");
+  },
+  { immediate: true },
+);
 </script>
 
 <template>
   <div class="app-shell">
-    <AppSidebar :active="active" :dark="dark" @navigate="active = $event" @toggle-theme="dark = !dark" />
+    <AppSidebar
+      :active="active"
+      :dark="dark"
+      @navigate="active = $event"
+      @toggle-theme="dark = !dark"
+    />
     <main class="workspace">
       <AppHeader :module="currentModule" />
       <div class="page-viewport">

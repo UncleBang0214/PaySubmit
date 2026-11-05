@@ -73,13 +73,19 @@ pub(crate) fn validate_credential_field(name: &str, value: &str) -> Result<(), S
             key.validate()
                 .map_err(|_| "私钥内容校验失败，可能已损坏".to_string())?;
             if key.n().bits() < MIN_RSA_BITS {
-                return Err(format!("当前 {} 位，至少需要 {MIN_RSA_BITS} 位", key.n().bits()));
+                return Err(format!(
+                    "当前 {} 位，至少需要 {MIN_RSA_BITS} 位",
+                    key.n().bits()
+                ));
             }
         }
         "rsa_public_key" => {
             let key = decode_rsa_public_key(value)?;
             if key.n().bits() < MIN_RSA_BITS {
-                return Err(format!("当前 {} 位，至少需要 {MIN_RSA_BITS} 位", key.n().bits()));
+                return Err(format!(
+                    "当前 {} 位，至少需要 {MIN_RSA_BITS} 位",
+                    key.n().bits()
+                ));
             }
         }
         "sm2_private_key" => {
@@ -442,4 +448,3 @@ fn decode_rsa_public_key(value: &str) -> Result<RsaPublicKey, String> {
         .or_else(|_| RsaPublicKey::from_pkcs1_der(&bytes))
         .map_err(|_| "不是有效的 SPKI 或 PKCS#1 公钥".to_string())
 }
-

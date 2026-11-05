@@ -701,4 +701,3 @@ fn canonical_json_object(object: &Map<String, Value>) -> Result<String, String> 
     }
     Ok(format!("{{{}}}", entries.join(",")))
 }
-
