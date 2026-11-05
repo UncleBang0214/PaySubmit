@@ -23,7 +23,6 @@
 | `settings.api.catalog` | 返回凭据业务域与签名组合目录 |
 | `settings.api.save` | 保存本地密钥（值不回显） |
 | `app.exit` | 退出应用（用于启动同意书“拒绝并退出”，不涉及业务数据） |
-| `settings.location` | 返回本地配置文件所在目录与完整路径（不含密钥内容） |
 | `app.open_config_dir` | 在资源管理器打开本地配置目录（仅定位，不读取内容） |
 
 ## 内置接口

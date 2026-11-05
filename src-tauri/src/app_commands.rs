@@ -23,11 +23,7 @@ pub async fn invoke_action(
 
     if matches!(
         action.as_str(),
-        "settings.get"
-            | "settings.api.catalog"
-            | "settings.api.save"
-            | "settings.api.import"
-            | "settings.location"
+        "settings.get" | "settings.api.catalog" | "settings.api.save" | "settings.api.import"
     ) {
         let settings = settings.inner().clone();
         return tauri::async_runtime::spawn_blocking(move || {
