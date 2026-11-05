@@ -54,11 +54,9 @@ const emit = defineEmits<{ agree: []; refuse: [] }>();
   place-items: center;
   padding: 24px;
   background:
-    radial-gradient(
-      120% 120% at 50% 0%,
+    radial-gradient(120% 120% at 50% 0%,
       color-mix(in srgb, var(--accent) 6%, transparent),
-      transparent 60%
-    ),
+      transparent 60%),
     var(--canvas);
 }
 

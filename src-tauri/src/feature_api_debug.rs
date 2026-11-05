@@ -199,13 +199,17 @@ pub(crate) fn execute(params: Value, settings: &SettingsStore) -> Result<Value, 
         Ok(text) => (text, false),
         Err(error) => {
             let bytes = error.into_bytes();
-            (
-                format!(
-                    "BASE64:{}",
-                    base64::Engine::encode(&base64::engine::general_purpose::STANDARD, bytes)
+            // 合利宝部分接口返回 GBK 编码的中文，先按 GB18030 解码再判断。
+            match decode_response_text(&bytes) {
+                Some(text) => (text, false),
+                None => (
+                    format!(
+                        "BASE64:{}",
+                        base64::Engine::encode(&base64::engine::general_purpose::STANDARD, bytes)
+                    ),
+                    true,
                 ),
-                true,
-            )
+            }
         }
     };
     let analysis = if binary {
@@ -247,6 +251,16 @@ pub(crate) fn require_credential(value: &str, label: &str) -> Result<(), String>
         Err(format!("接口调试缺少{label}"))
     } else {
         Ok(())
+    }
+}
+
+/// UTF-8 解码失败时，按 GB18030 解码中文响应；解码仍有错误则返回 None。
+fn decode_response_text(bytes: &[u8]) -> Option<String> {
+    let (text, _, had_errors) = encoding_rs::GB18030.decode(bytes);
+    if had_errors {
+        None
+    } else {
+        Some(text.into_owned())
     }
 }
 
