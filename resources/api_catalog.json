@@ -164,7 +164,7 @@
           "request_type": "MerchantAccountQueryReq",
           "variant": "md5",
           "protocol": "form_md5_fields",
-          "endpoint": "http://pay.trx.helipay.com/trx/merchant/interface.action",
+          "endpoint": "https://pay.trx.helipay.com/trx/merchant/interface.action",
           "content_type": "form",
           "response_sign_fields": [
             "rt1_bizType",

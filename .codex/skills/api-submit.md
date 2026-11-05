@@ -31,6 +31,8 @@
 | `MerchantSettlement` 商户结算 | 结算申请 / 结算查询 | `form_sm_sign`（SM2 签名） | 商户 SM2 私钥 + 平台 SM2 公钥 |
 | `MerchantAccountQuery` 余额查询 | 账户余额查询 | `form_md5_fields`（MD5 + 3DES） | MD5 签名密钥（如字段需加密再填 3DES 密钥） |
 
+余额查询接口地址：`https://pay.trx.helipay.com/trx/merchant/interface.action`（强制 HTTPS）。
+
 余额查询请求字段：`P1_bizType=MerchantAccountQuery`、`P2_customerNumber`、`P3_timestamp`；
 响应关键字段：`rt5_accountStatus`、`rt6_balance`、`rt7_frozenBalance`、`rt8_d0Balance`、`rt9_T1Balance`、`rt10_currency`。
 
