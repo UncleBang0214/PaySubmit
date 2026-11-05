@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, reactive, ref } from "vue";
-import { KeyRound, LoaderCircle, Save } from "lucide-vue-next";
+import { FolderOpen, KeyRound, LoaderCircle, Save } from "lucide-vue-next";
 
 import SelectControl from "../components/SelectControl.vue";
 import { loadApiCatalog, saveApiChanges, useSettings } from "../composables/useSettings";
@@ -12,6 +12,7 @@ import type {
   CredentialField,
 } from "../composables/useSettings";
 import { useUi } from "../composables/useUi";
+import { rpc } from "../rpc";
 import { errorMessage } from "../utils";
 
 const fieldLabels: Record<CredentialField, string> = {
@@ -102,6 +103,15 @@ async function save() {
     busy.value = false;
   }
 }
+
+async function openConfigDir() {
+  try {
+    const result = await rpc<{ path: string }>("app.open_config_dir");
+    notify(`已打开配置目录：${result.path}`, "neutral");
+  } catch (error) {
+    notify(errorMessage(error), "error");
+  }
+}
 </script>
 
 <template>
@@ -160,6 +170,9 @@ async function save() {
 
     <footer class="surface-footer">
       <span class="settings-status">{{ saving ? "正在保存" : "密钥留空表示不修改" }}</span>
+      <button type="button" class="btn ghost" :disabled="busy" @click="openConfigDir">
+        <FolderOpen :size="15" />打开配置目录
+      </button>
       <button type="button" class="btn primary" :disabled="busy || loadingCatalog" @click="save">
         <LoaderCircle v-if="busy" :size="15" class="spin" /><Save v-else :size="15" />保存密钥
       </button>
