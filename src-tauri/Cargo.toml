@@ -34,7 +34,7 @@ zeroize = "1"
 aes = "0.8"
 des = "0.8"
 md-5 = { version = "0.10", features = ["oid"] }
-sha2 = "0.10"
+sha2 = "0.11"
 sm2 = "0.14"
 hex = "0.4"
 chrono = "0.4"
