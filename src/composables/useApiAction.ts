@@ -32,6 +32,15 @@ const BALANCE_FIELD_LABELS: Record<string, string> = {
   rt15_amountToBeSettled: "可结算金额",
 };
 
+// 账户状态枚举的中文含义，便于普通用户理解。
+const ACCOUNT_STATUS_LABELS: Record<string, string> = {
+  AVAILABLE: "正常",
+  FROZEN: "冻结",
+  FREEZE_DEBIT: "冻结出账",
+  FREEZE_CREDIT: "冻结入账",
+  CANCELLED: "已注销",
+};
+
 // 发起结算：展示商户、订单与流水信息。
 const SETTLEMENT_FIELD_LABELS: Record<string, string> = {
   rt4_customerNumber: "商户编号",
@@ -111,8 +120,11 @@ export async function runApiAction(
   const fieldLabels = apiId.includes("balance") ? BALANCE_FIELD_LABELS : SETTLEMENT_FIELD_LABELS;
   const items: ResultItem[] = [];
   for (const [key, label] of Object.entries(fieldLabels)) {
-    const value = flat[key];
-    if (value !== undefined && value !== "") items.push({ label, value });
+    const rawValue = flat[key];
+    if (rawValue === undefined || rawValue === "") continue;
+    const value =
+      key === "rt5_accountStatus" ? (ACCOUNT_STATUS_LABELS[rawValue] ?? rawValue) : rawValue;
+    items.push({ label, value });
   }
 
   return { ok, status: raw.response.status, retCode, message, items };
