@@ -5,12 +5,12 @@
       "name": "公共产品",
       "interfaces": [
         {
-          "id": "public.sm.balance_query",
+          "id": "public.md5.balance_query",
           "name": "余额查询",
           "function": "balanceQuery",
           "request_type": "MerchantAccountQueryReq",
-          "variant": "sm",
-          "protocol": "form_sm_sign",
+          "variant": "md5",
+          "protocol": "form_md5_fields",
           "endpoint": "",
           "content_type": "form",
           "response_sign_fields": [
@@ -48,14 +48,6 @@
               "name": "P3_timestamp",
               "kind": "string",
               "default": "{{timestamp}}",
-              "sign": true,
-              "encrypt": false,
-              "omit_empty": false
-            },
-            {
-              "name": "signType",
-              "kind": "string",
-              "default": "SM3WITHSM2",
               "sign": true,
               "encrypt": false,
               "omit_empty": false

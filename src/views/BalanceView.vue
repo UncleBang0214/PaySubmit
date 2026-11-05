@@ -22,7 +22,7 @@ async function submit() {
   busy.value = true;
   result.value = null;
   try {
-    result.value = await runApiAction("public.sm.balance_query", customer, {});
+    result.value = await runApiAction("public.md5.balance_query", customer, {});
     notify(result.value.ok ? "查询成功" : "查询未成功", result.value.ok ? "success" : "warning");
   } catch (error) {
     notify(errorMessage(error), "error");

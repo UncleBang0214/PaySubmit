@@ -5,31 +5,34 @@ import { FolderOpen, KeyRound, LoaderCircle, Save } from "lucide-vue-next";
 import FilePicker from "../components/FilePicker.vue";
 import { choosePublicCertificatePath, chooseSmPrivateKeyPath } from "../dialogs";
 import { saveApiChanges, useSettings } from "../composables/useSettings";
-import type {
-  ApiCombo,
-  ApiDomain,
-  CredentialChanges,
-  CredentialField,
-} from "../composables/useSettings";
+import type { CredentialChanges, CredentialField } from "../composables/useSettings";
 import { useUi } from "../composables/useUi";
 import { rpc } from "../rpc";
 import { errorMessage } from "../utils";
 
-// 面向 C 端只使用国密密钥：商户 SM2 私钥 + 平台 SM2 公钥（均为 Base64）。
-const DOMAIN: ApiDomain = "domestic";
-const COMBO: ApiCombo = "sm";
-const SCOPE = "global";
+// 余额查询走 MD5 签名，发起结算走国密 SM2 签名；两种密钥分别保存。
+const MD5_SCOPE = "PublicProduct";
 
-const keyFields: { key: CredentialField; label: string; hint: string }[] = [
+interface KeyFieldDef {
+  key: CredentialField;
+  label: string;
+  hint: string;
+  kind: "md5" | "sm";
+}
+
+const keyFields: KeyFieldDef[] = [
+  { key: "md5_key", label: "MD5 签名密钥", hint: "余额查询接口签名使用", kind: "md5" },
   {
     key: "sm2_private_key",
     label: "商户 SM2 私钥",
-    hint: "Base64 编码的私钥标量，可用下方证书读取获得",
+    hint: "结算接口签名使用，Base64 编码的私钥标量",
+    kind: "sm",
   },
   {
     key: "sm2_public_key",
     label: "平台 SM2 公钥",
-    hint: "Base64 编码的 SEC1 公钥，可用下方证书读取获得",
+    hint: "结算接口验签使用，Base64 编码的 SEC1 公钥",
+    kind: "sm",
   },
 ];
 
@@ -52,13 +55,14 @@ const certPath = ref("");
 const password = ref("");
 const extracting = ref(false);
 
-const summary = computed(() => snapshot.value?.sm_domains?.[DOMAIN]?.combos?.[COMBO]);
+const summary = computed(() => snapshot.value?.sm_domains?.domestic?.combos?.sm);
 const canExtract = computed(() => Boolean(privatePath.value || certPath.value));
 
-function configured(key: CredentialField): boolean {
-  const combo = summary.value;
-  if (!combo) return false;
-  return (combo as Record<string, unknown>)[key] === true;
+function configured(field: KeyFieldDef): boolean {
+  if (field.kind === "md5") {
+    return snapshot.value?.products?.[MD5_SCOPE]?.combos?.des_md5?.[field.key] === true;
+  }
+  return (summary.value as Record<string, unknown> | undefined)?.[field.key] === true;
 }
 
 onMounted(async () => {
@@ -72,20 +76,32 @@ onMounted(async () => {
 });
 
 async function save() {
-  const changes: CredentialChanges = {};
-  for (const field of keyFields) {
-    const value = drafts[field.key];
-    if (value !== undefined && value.trim() !== "") changes[field.key] = value.trim();
-  }
-  if (Object.keys(changes).length === 0) {
+  const md5Changes: CredentialChanges = {};
+  const smChanges: CredentialChanges = {};
+  const md5Value = drafts.md5_key?.trim();
+  const smPrivate = drafts.sm2_private_key?.trim();
+  const smPublic = drafts.sm2_public_key?.trim();
+  if (md5Value) md5Changes.md5_key = md5Value;
+  if (smPrivate) smChanges.sm2_private_key = smPrivate;
+  if (smPublic) smChanges.sm2_public_key = smPublic;
+  if (Object.keys(md5Changes).length === 0 && Object.keys(smChanges).length === 0) {
     notify("没有需要保存的密钥内容", "neutral");
     return;
   }
   busy.value = true;
   try {
-    await saveApiChanges(DOMAIN, COMBO, SCOPE, changes, snapshot.value?.revision ?? 0);
-    for (const field of keyFields) delete drafts[field.key];
-    notify("国密密钥已加密保存");
+    let revision = snapshot.value?.revision ?? 0;
+    if (Object.keys(md5Changes).length > 0) {
+      const result = await saveApiChanges("domestic", "des_md5", MD5_SCOPE, md5Changes, revision);
+      revision = result.revision;
+    }
+    if (Object.keys(smChanges).length > 0) {
+      await saveApiChanges("domestic", "sm", "global", smChanges, revision);
+    }
+    delete drafts.md5_key;
+    delete drafts.sm2_private_key;
+    delete drafts.sm2_public_key;
+    notify("本地密钥已加密保存");
   } catch (error) {
     notify(errorMessage(error), "error");
   } finally {
@@ -148,7 +164,7 @@ async function openConfigDir() {
         <KeyRound :size="18" />
         <div>
           <h2>本地密钥</h2>
-          <span>国密密钥仅保存在本机，加密存储，不回显明文</span>
+          <span>密钥仅保存在本机，加密存储，不回显明文</span>
         </div>
       </div>
     </header>
@@ -158,19 +174,29 @@ async function openConfigDir() {
         v-for="field in keyFields"
         :key="field.key"
         class="key-field"
-        :class="{ configured: configured(field.key) }"
+        :class="{ configured: configured(field) }"
       >
         <div class="key-head">
           <span class="key-label">{{ field.label }}</span>
-          <span class="key-status">{{ configured(field.key) ? "已配置" : "未配置" }}</span>
+          <span class="key-status">{{ configured(field) ? "已配置" : "未配置" }}</span>
         </div>
+        <input
+          v-if="field.kind === 'md5'"
+          v-model="drafts[field.key]"
+          type="password"
+          autocomplete="off"
+          spellcheck="false"
+          :disabled="busy || loading"
+          :placeholder="configured(field) ? '留空表示不修改' : `请输入${field.label}`"
+        />
         <textarea
+          v-else
           v-model="drafts[field.key]"
           rows="3"
           spellcheck="false"
           autocomplete="off"
           :disabled="busy || loading"
-          :placeholder="configured(field.key) ? '留空表示不修改' : `请粘贴${field.label} Base64`"
+          :placeholder="configured(field) ? '留空表示不修改' : `请粘贴${field.label} Base64`"
         ></textarea>
         <span class="key-hint">{{ field.hint }}</span>
       </div>
