@@ -82,6 +82,9 @@ struct ExecuteParams {
     endpoint: String,
     #[serde(default)]
     payload: Map<String, Value>,
+    /// 请求期填写的商户编号（面向 C 端按次输入，不写入本地密钥）。
+    #[serde(default)]
+    customer_number: String,
     #[serde(default = "default_timeout_seconds")]
     timeout_seconds: u64,
 }
@@ -121,10 +124,13 @@ pub(crate) fn execute(params: Value, settings: &SettingsStore) -> Result<Value, 
         .ok_or_else(|| format!("接口目录中不存在调试入口：{}", params.api_id))?;
     let credentials = credentials_for_definition(product_id, definition, settings)?;
 
-    let endpoint = if params.endpoint.trim().is_empty() {
-        definition.endpoint.trim()
-    } else {
+    let endpoint: &str = if !params.endpoint.trim().is_empty() {
         params.endpoint.trim()
+    } else if let Some(fixed) = crate::core_config::builtin_endpoint(&definition.id) {
+        // 内置业务接口地址来自代码 config，界面不再暴露地址编辑。
+        fixed
+    } else {
+        definition.endpoint.trim()
     };
     let endpoint_url =
         Url::parse(endpoint).map_err(|error| format!("接口地址格式无效：{error}"))?;
@@ -138,10 +144,15 @@ pub(crate) fn execute(params: Value, settings: &SettingsStore) -> Result<Value, 
         return Err(format!("请求超时必须在 1 到 {MAX_TIMEOUT_SECONDS} 秒之间"));
     }
 
-    require_credential(&credentials.customer_number, "商户编号").map_err(|error| {
-        format!("{error}；请在设置→接口配置中为非国密选择对应产品、为国密选择对应共享业务域后填写，旧配置需显式导入")
-    })?;
-    let payload = build_payload(definition, &params.payload, &credentials.customer_number)?;
+    let customer_number = if !params.customer_number.trim().is_empty() {
+        params.customer_number.trim().to_owned()
+    } else {
+        credentials.customer_number.clone()
+    };
+    if customer_number.trim().is_empty() {
+        return Err("请填写商户编号".to_string());
+    }
+    let payload = build_payload(definition, &params.payload, &customer_number)?;
     let prepared = prepare_request(definition, &payload, &credentials)?;
     let client = ClientBuilder::new()
         .timeout(Duration::from_secs(params.timeout_seconds))

@@ -2,10 +2,8 @@
 import { computed, onMounted, reactive, ref } from "vue";
 import { FolderOpen, KeyRound, LoaderCircle, Save } from "lucide-vue-next";
 
-import SelectControl from "../components/SelectControl.vue";
-import { loadApiCatalog, saveApiChanges, useSettings } from "../composables/useSettings";
+import { saveApiChanges, useSettings } from "../composables/useSettings";
 import type {
-  ApiCatalog,
   ApiCombo,
   ApiDomain,
   CredentialChanges,
@@ -15,87 +13,54 @@ import { useUi } from "../composables/useUi";
 import { rpc } from "../rpc";
 import { errorMessage } from "../utils";
 
-const fieldLabels: Record<CredentialField, string> = {
-  customer_number: "商户编号",
-  md5_key: "MD5签名密钥",
-  sha256_key: "SHA256签名密钥",
-  triple_des_key: "3DES加密密钥",
-  aes_key: "AES加密密钥",
-  rsa_private_key: "商户RSA私钥",
-  rsa_public_key: "平台RSA公钥",
-  sm2_private_key: "商户SM2私钥",
-  sm2_public_key: "平台SM2公钥",
-};
+// 面向 C 端仅保留「公共产品」一套 3DES + MD5 密钥。
+const PRODUCT_SCOPE = "PublicProduct";
+const DOMAIN: ApiDomain = "domestic";
+const COMBO: ApiCombo = "des_md5";
 
-const { snapshot, saving, ensureSettings: ensure } = useSettings();
+const keyFields: { key: CredentialField; label: string; hint: string }[] = [
+  { key: "triple_des_key", label: "3DES 密钥", hint: "用于请求字段的三重DES加密" },
+  { key: "md5_key", label: "MD5 密钥", hint: "用于请求参数签名" },
+];
+
+const { snapshot, saving, ensureSettings } = useSettings();
 const { notify } = useUi();
-const catalog = ref<ApiCatalog>({ domains: [] });
-const domain = ref<ApiDomain>("domestic");
-const combo = ref<ApiCombo>("des_md5");
-const product = ref("");
 const drafts = reactive<Partial<Record<CredentialField, string>>>({});
 const busy = ref(false);
-const loadingCatalog = ref(true);
+const loading = ref(true);
 
-const domainOptions = computed(() =>
-  catalog.value.domains.map((item) => ({ value: item.id, label: item.name })),
-);
-const currentDomain = computed(() =>
-  catalog.value.domains.find((item) => item.id === domain.value),
-);
-const comboOptions = computed(() =>
-  (currentDomain.value?.combos ?? []).map((item) => ({ value: item.id, label: item.name })),
-);
-const currentCombo = computed(() =>
-  currentDomain.value?.combos.find((item) => item.id === combo.value),
-);
-const productOptions = computed(() =>
-  (currentCombo.value?.products ?? []).map((item) => ({ value: item.id, label: item.name })),
-);
-const fields = computed<CredentialField[]>(() => [
-  "customer_number",
-  ...(currentCombo.value?.fields ?? []),
-]);
-const scope = computed(() => (combo.value === "sm" ? domain.value : product.value));
+const summary = computed(() => snapshot.value?.products?.[PRODUCT_SCOPE]?.combos?.[COMBO]);
+
+function configured(key: CredentialField): boolean {
+  const combo = summary.value;
+  if (!combo) return false;
+  return (combo as Record<string, unknown>)[key] === true;
+}
 
 onMounted(async () => {
   try {
-    await ensure();
-    catalog.value = await loadApiCatalog();
-    domain.value = catalog.value.domains[0]?.id ?? "domestic";
-    combo.value = catalog.value.domains[0]?.combos[0]?.id ?? "des_md5";
-    product.value = catalog.value.domains[0]?.combos[0]?.products[0]?.id ?? "";
+    await ensureSettings();
   } catch (error) {
     notify(errorMessage(error), "error");
   } finally {
-    loadingCatalog.value = false;
+    loading.value = false;
   }
 });
 
 async function save() {
   const changes: CredentialChanges = {};
-  for (const field of fields.value) {
-    const value = drafts[field];
-    if (value !== undefined && value !== "") changes[field] = value;
+  for (const field of keyFields) {
+    const value = drafts[field.key];
+    if (value !== undefined && value !== "") changes[field.key] = value;
   }
   if (Object.keys(changes).length === 0) {
     notify("没有需要保存的密钥内容", "neutral");
     return;
   }
-  if (!scope.value) {
-    notify("请先选择产品", "error");
-    return;
-  }
   busy.value = true;
   try {
-    await saveApiChanges(
-      domain.value,
-      combo.value,
-      scope.value,
-      changes,
-      snapshot.value?.revision ?? 0,
-    );
-    for (const field of fields.value) delete drafts[field];
+    await saveApiChanges(DOMAIN, COMBO, PRODUCT_SCOPE, changes, snapshot.value?.revision ?? 0);
+    for (const field of keyFields) delete drafts[field.key];
     notify("本地密钥已加密保存");
   } catch (error) {
     notify(errorMessage(error), "error");
@@ -115,7 +80,7 @@ async function openConfigDir() {
 </script>
 
 <template>
-  <div class="tool-surface credentials-pane">
+  <div class="tool-surface credentials-surface">
     <header class="surface-header">
       <div class="section-title">
         <KeyRound :size="18" />
@@ -127,45 +92,31 @@ async function openConfigDir() {
     </header>
 
     <div class="credentials-body">
-      <div class="field">
-        <span>业务域</span
-        ><SelectControl
-          v-model="domain"
-          :options="domainOptions"
-          aria-label="业务域"
-          :disabled="busy || loadingCatalog"
-        />
-      </div>
-      <div class="field">
-        <span>签名组合</span
-        ><SelectControl
-          v-model="combo"
-          :options="comboOptions"
-          aria-label="签名组合"
-          :disabled="busy || loadingCatalog"
-        />
-      </div>
-      <div class="field">
-        <span>产品</span
-        ><SelectControl
-          v-model="product"
-          :options="productOptions"
-          aria-label="产品"
-          :disabled="busy || loadingCatalog"
-        />
+      <div class="product-row">
+        <span class="product-label">产品</span>
+        <span class="product-value">公共产品</span>
       </div>
 
-      <label v-for="field in fields" :key="field" class="field">
-        <span>{{ fieldLabels[field] }}</span>
+      <div
+        v-for="field in keyFields"
+        :key="field.key"
+        class="key-field"
+        :class="{ configured: configured(field.key) }"
+      >
+        <div class="key-head">
+          <span class="key-label">{{ field.label }}</span>
+          <span class="key-status">{{ configured(field.key) ? "已配置" : "未配置" }}</span>
+        </div>
         <input
-          v-model="drafts[field]"
-          :type="field === 'customer_number' ? 'text' : 'password'"
+          v-model="drafts[field.key]"
+          type="password"
           autocomplete="off"
           spellcheck="false"
-          :disabled="busy"
-          :placeholder="field === 'customer_number' ? '留空表示不修改' : '留空表示不修改'"
+          :disabled="busy || loading"
+          :placeholder="configured(field.key) ? '留空表示不修改' : `请输入${field.label}`"
         />
-      </label>
+        <span class="key-hint">{{ field.hint }}</span>
+      </div>
     </div>
 
     <footer class="surface-footer">
@@ -173,9 +124,77 @@ async function openConfigDir() {
       <button type="button" class="btn ghost" :disabled="busy" @click="openConfigDir">
         <FolderOpen :size="15" />打开配置目录
       </button>
-      <button type="button" class="btn primary" :disabled="busy || loadingCatalog" @click="save">
+      <button type="button" class="btn primary" :disabled="busy || loading" @click="save">
         <LoaderCircle v-if="busy" :size="15" class="spin" /><Save v-else :size="15" />保存密钥
       </button>
     </footer>
   </div>
 </template>
+
+<style scoped>
+.credentials-surface {
+  max-width: 760px;
+}
+.credentials-body {
+  display: grid;
+  gap: 16px;
+  padding: 20px;
+}
+.product-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px 14px;
+  background: var(--surface-subtle);
+}
+.product-label {
+  color: var(--text-muted);
+  font-size: 13px;
+}
+.product-value {
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 600;
+}
+.key-field {
+  display: grid;
+  gap: 7px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 14px;
+  background: var(--surface);
+}
+.key-field.configured {
+  border-color: color-mix(in srgb, var(--success) 40%, var(--border));
+}
+.key-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.key-label {
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 600;
+}
+.key-status {
+  border-radius: 999px;
+  padding: 1px 9px;
+  background: var(--surface-hover);
+  color: var(--text-faint);
+  font-size: 11px;
+}
+.key-field.configured .key-status {
+  background: var(--success-soft);
+  color: var(--success);
+}
+.key-field input {
+  width: 100%;
+}
+.key-hint {
+  color: var(--text-faint);
+  font-size: 11.5px;
+}
+</style>

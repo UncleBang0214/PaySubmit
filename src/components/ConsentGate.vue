@@ -7,7 +7,9 @@ const emit = defineEmits<{ agree: []; refuse: [] }>();
 <template>
   <div class="consent-gate" role="dialog" aria-modal="true" aria-labelledby="consent-title">
     <section class="consent-card">
-      <span class="consent-badge"><ShieldCheck :size="26" /></span>
+      <span class="consent-badge">
+        <ShieldCheck :size="26" />
+      </span>
       <h1 id="consent-title">开源与隐私声明</h1>
       <p class="consent-lead">
         PaySubmit（支付提交工具）是一款以 <strong>Apache-2.0</strong>
@@ -59,6 +61,7 @@ const emit = defineEmits<{ agree: []; refuse: [] }>();
     ),
     var(--canvas);
 }
+
 .consent-card {
   width: min(560px, 100%);
   border: 1px solid var(--border);
@@ -67,6 +70,7 @@ const emit = defineEmits<{ agree: []; refuse: [] }>();
   background: var(--surface);
   box-shadow: var(--shadow-dialog);
 }
+
 .consent-badge {
   display: grid;
   width: 54px;
@@ -76,18 +80,21 @@ const emit = defineEmits<{ agree: []; refuse: [] }>();
   background: var(--accent-soft);
   color: var(--accent);
 }
+
 .consent-card h1 {
   margin: 16px 0 0;
   color: var(--text);
   font-size: 20px;
   letter-spacing: 0.2px;
 }
+
 .consent-lead {
   margin: 10px 0 0;
   color: var(--text-muted);
   font-size: 13.5px;
   line-height: 1.7;
 }
+
 .consent-repo {
   display: flex;
   align-items: center;
@@ -98,11 +105,13 @@ const emit = defineEmits<{ agree: []; refuse: [] }>();
   border-radius: 8px;
   background: var(--surface-subtle);
 }
+
 .consent-repo-label {
   flex: 0 0 auto;
   color: var(--text-faint);
   font-size: 12px;
 }
+
 .consent-repo code {
   min-width: 0;
   overflow: hidden;
@@ -113,6 +122,7 @@ const emit = defineEmits<{ agree: []; refuse: [] }>();
   white-space: nowrap;
   user-select: all;
 }
+
 .consent-points {
   display: grid;
   gap: 10px;
@@ -120,6 +130,7 @@ const emit = defineEmits<{ agree: []; refuse: [] }>();
   padding: 0;
   list-style: none;
 }
+
 .consent-points li {
   position: relative;
   padding-left: 22px;
@@ -127,6 +138,7 @@ const emit = defineEmits<{ agree: []; refuse: [] }>();
   font-size: 13px;
   line-height: 1.65;
 }
+
 .consent-points li::before {
   content: "";
   position: absolute;
@@ -138,16 +150,19 @@ const emit = defineEmits<{ agree: []; refuse: [] }>();
   background: var(--accent);
   box-shadow: 0 0 0 3px var(--accent-soft);
 }
+
 .consent-points strong {
   color: var(--text);
   font-weight: 620;
 }
+
 .consent-footnote {
   margin: 16px 0 0;
   color: var(--text-faint);
   font-size: 12px;
   line-height: 1.6;
 }
+
 .consent-actions {
   display: flex;
   justify-content: flex-end;

@@ -42,6 +42,22 @@ pub(crate) struct ApiProductCredentialConfig {
 // 开源项目不内置任何产品级默认凭据。仅当用户后续需要区分产品默认值时，再于此处显式追加。
 pub(crate) const API_PRODUCT_CREDENTIALS: &[ApiProductCredentialConfig] = &[];
 
+// 内置业务接口地址（按需求在代码 config 中固定，不经界面或接口目录读取）。
+// 注意：以下为实际对接渠道地址，对外开源发布前请自行评估是否脱敏。
+pub(crate) const API_BALANCE_ENDPOINT: &str =
+    "https://pay.trx.helipay.com/trx/merchant/interface.action";
+pub(crate) const API_SETTLEMENT_ENDPOINT: &str =
+    "https://transfer.trx.helipay.com/trx/transfer/interface.action";
+
+/// 按内置接口 ID 返回固定请求地址；未知接口返回 None，回退到接口目录中的地址。
+pub(crate) fn builtin_endpoint(api_id: &str) -> Option<&'static str> {
+    match api_id {
+        "public.md5.balance_query" => Some(API_BALANCE_ENDPOINT),
+        "public.md5.settlement_apply" => Some(API_SETTLEMENT_ENDPOINT),
+        _ => None,
+    }
+}
+
 pub(crate) fn api_credentials_for_product(product_id: &str) -> ApiCredentialConfig {
     let product = API_PRODUCT_CREDENTIALS
         .iter()

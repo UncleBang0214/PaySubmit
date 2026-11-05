@@ -1,4 +1,4 @@
-export type ModuleKey = "submit" | "credentials";
+export type ModuleKey = "balance" | "settlement" | "credentials";
 export type StatusTone = "neutral" | "success" | "error" | "warning";
 
 export interface ModuleDefinition {
@@ -6,5 +6,5 @@ export interface ModuleDefinition {
   label: string;
   description: string;
   group: "workspace";
-  icon: "api" | "certificate";
+  icon: "wallet" | "banknote" | "certificate";
 }

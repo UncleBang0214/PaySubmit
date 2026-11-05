@@ -1,170 +1,17 @@
 {
   "products": [
     {
-      "id": "MerchantSettlement",
-      "name": "商户结算",
+      "id": "PublicProduct",
+      "name": "公共产品",
       "interfaces": [
         {
-          "id": "merchantsettlement.sm.merchant_settlement_apply",
-          "name": "merchantSettlementApply",
-          "function": "merchantSettlementApply",
-          "request_type": "MerchantSettlementApplyReq",
-          "variant": "sm",
-          "protocol": "form_sm_sign",
-          "endpoint": "https://example.invalid/merchant-settlement",
-          "content_type": "form",
-          "response_sign_fields": [
-            "rt1_bizType",
-            "rt2_retCode",
-            "rt4_customerNumber",
-            "rt5_orderId"
-          ],
-          "fields": [
-            {
-              "name": "P1_bizType",
-              "kind": "string",
-              "default": "MerchantSettlement",
-              "sign": true,
-              "encrypt": false,
-              "omit_empty": false
-            },
-            {
-              "name": "P2_orderId",
-              "kind": "string",
-              "default": "ORDER{{timestamp}}",
-              "sign": true,
-              "encrypt": false,
-              "omit_empty": false
-            },
-            {
-              "name": "P3_customerNumber",
-              "kind": "string",
-              "default": "{{customer_number}}",
-              "sign": true,
-              "encrypt": false,
-              "omit_empty": false
-            },
-            {
-              "name": "P4_amount",
-              "kind": "string",
-              "default": "0.01",
-              "sign": true,
-              "encrypt": false,
-              "omit_empty": false
-            },
-            {
-              "name": "P5_summary",
-              "kind": "string",
-              "default": "订单备注",
-              "sign": true,
-              "encrypt": false,
-              "omit_empty": false
-            },
-            {
-              "name": "P6_notifyUrl",
-              "kind": "string",
-              "default": "http://localhost/notify/merchant-settlement",
-              "sign": false,
-              "encrypt": false,
-              "omit_empty": false
-            },
-            {
-              "name": "P7_transferSummary",
-              "kind": "string",
-              "default": "打款摘要",
-              "sign": false,
-              "encrypt": false,
-              "omit_empty": false
-            },
-            {
-              "name": "debitAccountMode",
-              "kind": "string",
-              "default": "",
-              "sign": false,
-              "encrypt": false,
-              "omit_empty": false
-            },
-            {
-              "name": "signType",
-              "kind": "string",
-              "default": "SM3WITHSM2",
-              "sign": true,
-              "encrypt": false,
-              "omit_empty": false
-            }
-          ]
-        },
-        {
-          "id": "merchantsettlement.sm.merchant_settlement_query",
-          "name": "merchantSettlementQuery",
-          "function": "merchantSettlementQuery",
-          "request_type": "MerchantSettlementQueryReq",
-          "variant": "sm",
-          "protocol": "form_sm_sign",
-          "endpoint": "https://example.invalid/merchant-settlement",
-          "content_type": "form",
-          "response_sign_fields": [
-            "rt1_bizType",
-            "rt2_retCode",
-            "rt4_settleRecords"
-          ],
-          "fields": [
-            {
-              "name": "P1_bizType",
-              "kind": "string",
-              "default": "MerchantSettlementQuery",
-              "sign": true,
-              "encrypt": false,
-              "omit_empty": false
-            },
-            {
-              "name": "P2_orderId",
-              "kind": "string",
-              "default": "ORDER{{timestamp}}",
-              "sign": true,
-              "encrypt": false,
-              "omit_empty": false
-            },
-            {
-              "name": "P3_customerNumber",
-              "kind": "string",
-              "default": "{{customer_number}}",
-              "sign": true,
-              "encrypt": false,
-              "omit_empty": false
-            },
-            {
-              "name": "P4_settleDate",
-              "kind": "string",
-              "default": "{{date}}",
-              "sign": true,
-              "encrypt": false,
-              "omit_empty": false
-            },
-            {
-              "name": "signType",
-              "kind": "string",
-              "default": "SM3WITHSM2",
-              "sign": true,
-              "encrypt": false,
-              "omit_empty": false
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "id": "MerchantAccountQuery",
-      "name": "余额查询",
-      "interfaces": [
-        {
-          "id": "merchantaccountquery.md5.main",
-          "name": "main",
-          "function": "main",
+          "id": "public.md5.balance_query",
+          "name": "余额查询",
+          "function": "balanceQuery",
           "request_type": "MerchantAccountQueryReq",
           "variant": "md5",
           "protocol": "form_md5_fields",
-          "endpoint": "https://pay.trx.helipay.com/trx/merchant/interface.action",
+          "endpoint": "",
           "content_type": "form",
           "response_sign_fields": [
             "rt1_bizType",
@@ -202,6 +49,74 @@
               "kind": "string",
               "default": "{{timestamp}}",
               "sign": true,
+              "encrypt": false,
+              "omit_empty": false
+            }
+          ]
+        },
+        {
+          "id": "public.md5.settlement_apply",
+          "name": "发起结算",
+          "function": "merchantSettlementApply",
+          "request_type": "MerchantSettlementApplyReq",
+          "variant": "md5",
+          "protocol": "form_md5_fields",
+          "endpoint": "",
+          "content_type": "form",
+          "response_sign_fields": [
+            "rt1_bizType",
+            "rt2_retCode",
+            "rt3_retMsg",
+            "rt4_customerNumber",
+            "rt5_orderId",
+            "rt6_serialNumber"
+          ],
+          "fields": [
+            {
+              "name": "P1_bizType",
+              "kind": "string",
+              "default": "MerchantSettlement",
+              "sign": true,
+              "encrypt": false,
+              "omit_empty": false
+            },
+            {
+              "name": "P2_orderId",
+              "kind": "string",
+              "default": "ORDER{{timestamp}}",
+              "sign": true,
+              "encrypt": false,
+              "omit_empty": false
+            },
+            {
+              "name": "P3_customerNumber",
+              "kind": "string",
+              "default": "{{customer_number}}",
+              "sign": true,
+              "encrypt": false,
+              "omit_empty": false
+            },
+            {
+              "name": "P4_amount",
+              "kind": "string",
+              "default": "",
+              "sign": true,
+              "encrypt": false,
+              "omit_empty": false
+            },
+            {
+              "name": "P5_summary",
+              "kind": "string",
+              "default": "结算",
+              "sign": true,
+              "encrypt": false,
+              "omit_empty": false
+            },
+            {
+              "name": "signType",
+              "kind": "string",
+              "default": "MD5",
+              "sign": false,
               "encrypt": false,
               "omit_empty": false
             }

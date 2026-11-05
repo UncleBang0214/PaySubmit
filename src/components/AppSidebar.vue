@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { Component } from "vue";
-import { KeyRound, Moon, SendHorizontal, Sun } from "lucide-vue-next";
+import { Banknote, KeyRound, Moon, Sun, Wallet } from "lucide-vue-next";
 
 import { MODULE_GROUPS, MODULES } from "../modules";
 import type { ModuleDefinition, ModuleKey } from "../types";
@@ -9,7 +9,8 @@ defineProps<{ active: ModuleKey; dark: boolean }>();
 const emit = defineEmits<{ navigate: [key: ModuleKey]; toggleTheme: [] }>();
 
 const icons: Record<ModuleDefinition["icon"], Component> = {
-  api: SendHorizontal,
+  wallet: Wallet,
+  banknote: Banknote,
   certificate: KeyRound,
 };
 </script>

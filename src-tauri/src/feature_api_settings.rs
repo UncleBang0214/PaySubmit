@@ -31,6 +31,7 @@ pub(crate) fn credential_route(
         | "LargePayment"
         | "MerchantAccountQuery"
         | "MerchantSettlement"
+        | "PublicProduct"
         | "Transfer"
         | "AccountPay"
         | "DelayedSplit"

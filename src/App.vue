@@ -12,10 +12,11 @@ import { useUi } from "./composables/useUi";
 import { MODULES } from "./modules";
 import { rpc } from "./rpc";
 import type { ModuleDefinition, ModuleKey } from "./types";
-import ApiSubmitView from "./views/ApiSubmitView.vue";
+import BalanceView from "./views/BalanceView.vue";
 import CredentialsView from "./views/CredentialsView.vue";
+import SettlementView from "./views/SettlementView.vue";
 
-const active = ref<ModuleKey>("submit");
+const active = ref<ModuleKey>("balance");
 const dark = ref(localStorage.getItem("paysubmit-theme") === "dark");
 const { confirmation, resolveConfirmation } = useUi();
 
@@ -35,7 +36,8 @@ async function onConsentRefuse() {
 }
 
 const views = {
-  submit: ApiSubmitView,
+  balance: BalanceView,
+  settlement: SettlementView,
   credentials: CredentialsView,
 };
 
