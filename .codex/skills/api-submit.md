@@ -22,6 +22,7 @@
 | `settings.get` | 返回本地密钥已配置状态摘要 |
 | `settings.api.catalog` | 返回凭据业务域与签名组合目录 |
 | `settings.api.save` | 保存本地密钥（值不回显） |
+| `app.exit` | 退出应用（用于启动同意书“拒绝并退出”，不涉及业务数据） |
 
 ## 安全约束
 

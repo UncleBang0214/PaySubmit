@@ -8,7 +8,14 @@ pub async fn invoke_action(
     action: String,
     params: Value,
     settings: State<'_, feature_settings::SettingsState>,
+    app: tauri::AppHandle,
 ) -> Result<Value, String> {
+    // 用户拒绝启动同意书时退出应用；仅用于关闭程序本身，不涉及任何业务数据。
+    if action == "app.exit" {
+        app.exit(0);
+        return Ok(serde_json::json!({ "exiting": true }));
+    }
+
     if matches!(
         action.as_str(),
         "settings.get" | "settings.api.catalog" | "settings.api.save" | "settings.api.import"

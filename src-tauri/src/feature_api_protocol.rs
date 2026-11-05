@@ -262,7 +262,7 @@ fn prepare_json_3des(
 ) -> Result<PreparedRequest, String> {
     require_credential(&credentials.triple_des_key, "3DES 密钥")?;
     require_credential(&credentials.sha256_key, "SHA-256 签名密钥")?;
-    if credentials.triple_des_key.as_bytes().len() != 24 {
+    if credentials.triple_des_key.len() != 24 {
         return Err("航采通 3DES 密钥必须是 24 字节".to_string());
     }
     let plaintext = serde_json::to_string(payload)

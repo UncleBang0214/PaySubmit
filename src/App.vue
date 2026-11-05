@@ -4,9 +4,11 @@ import { computed, ref, watch } from "vue";
 import AppHeader from "./components/AppHeader.vue";
 import AppSidebar from "./components/AppSidebar.vue";
 import ConfirmDialog from "./components/ConfirmDialog.vue";
+import ConsentGate from "./components/ConsentGate.vue";
 import ToastRegion from "./components/ToastRegion.vue";
 import { useUi } from "./composables/useUi";
 import { MODULES } from "./modules";
+import { rpc } from "./rpc";
 import type { ModuleDefinition, ModuleKey } from "./types";
 import ApiSubmitView from "./views/ApiSubmitView.vue";
 import CredentialsView from "./views/CredentialsView.vue";
@@ -14,6 +16,21 @@ import CredentialsView from "./views/CredentialsView.vue";
 const active = ref<ModuleKey>("submit");
 const dark = ref(localStorage.getItem("paysubmit-theme") === "dark");
 const { confirmation, resolveConfirmation } = useUi();
+
+// 启动同意书：未同意前不渲染主界面，拒绝则退出应用。
+const consented = ref(false);
+
+function onConsentAgree() {
+  consented.value = true;
+}
+
+async function onConsentRefuse() {
+  try {
+    await rpc("app.exit");
+  } catch {
+    window.close();
+  }
+}
 
 const views = {
   submit: ApiSubmitView,
@@ -37,7 +54,8 @@ watch(
 </script>
 
 <template>
-  <div class="app-shell">
+  <ConsentGate v-if="!consented" @agree="onConsentAgree" @refuse="onConsentRefuse" />
+  <div v-else class="app-shell">
     <AppSidebar
       :active="active"
       :dark="dark"

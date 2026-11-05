@@ -117,7 +117,7 @@ pub(crate) fn triple_des_encrypt(key: &str, data: &str) -> Result<String, String
     let cipher = TdesEde3::new_from_slice(&key)
         .map_err(|_| "3DES 密钥无法初始化，请检查密钥长度".to_string())?;
     let mut output = pkcs7_pad(data.as_bytes(), 8);
-    for block in output.chunks_exact_mut(8) {
+    for block in output.as_chunks_mut::<8>().0 {
         cipher.encrypt_block(GenericArray::from_mut_slice(block));
     }
     Ok(general_purpose::STANDARD.encode(output))
@@ -131,7 +131,7 @@ pub(crate) fn triple_des_decrypt(key: &str, data: &str) -> Result<String, String
     if output.is_empty() || output.len() % 8 != 0 {
         return Err("3DES 密文长度无效".to_string());
     }
-    for block in output.chunks_exact_mut(8) {
+    for block in output.as_chunks_mut::<8>().0 {
         cipher.decrypt_block(GenericArray::from_mut_slice(block));
     }
     let output = pkcs7_unpad(&output, 8)?;
@@ -298,13 +298,13 @@ fn normalize_triple_des_key(key: &[u8]) -> Result<[u8; 24], String> {
 }
 
 fn encrypt_aes_blocks<C: BlockEncrypt>(cipher: &C, output: &mut [u8]) {
-    for block in output.chunks_exact_mut(16) {
+    for block in output.as_chunks_mut::<16>().0 {
         cipher.encrypt_block(GenericArray::from_mut_slice(block));
     }
 }
 
 fn decrypt_aes_blocks<C: BlockDecrypt>(cipher: &C, output: &mut [u8]) {
-    for block in output.chunks_exact_mut(16) {
+    for block in output.as_chunks_mut::<16>().0 {
         cipher.decrypt_block(GenericArray::from_mut_slice(block));
     }
 }

@@ -91,6 +91,7 @@ pub(crate) fn catalog() -> Result<Value, String> {
 }
 
 #[cfg(test)]
+#[allow(dead_code)]
 fn validate_settings_scope(scope: &str) -> Result<(), String> {
     if scope == "global"
         || load_catalog()?

@@ -51,6 +51,6 @@ jobs:
       - name: 格式检查
         run: cargo fmt --manifest-path src-tauri/Cargo.toml --all -- --check
       - name: 静态检查
-        run: cargo clippy --manifest-path src-tauri/Cargo.toml --all-targets
+        run: cargo clippy --manifest-path src-tauri/Cargo.toml --all-targets -- -D warnings
       - name: 单元测试
         run: cargo test --manifest-path src-tauri/Cargo.toml

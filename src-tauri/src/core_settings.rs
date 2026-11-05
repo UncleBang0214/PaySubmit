@@ -640,8 +640,10 @@ impl SettingsStore {
         let Some(scope) = scope else {
             return Ok(UserApiCredentials::default());
         };
-        let mut effective = UserApiCredentials::default();
-        effective.customer_number = scope.customer_number.clone();
+        let mut effective = UserApiCredentials {
+            customer_number: scope.customer_number.clone(),
+            ..Default::default()
+        };
         let credentials = scope.combos.get(combo);
         for &field in combo_fields(combo)? {
             *field.get_mut(&mut effective) = credentials
@@ -794,11 +796,13 @@ fn legacy_domain_effective(
     let product = domain.products.get(product_id);
     let defaults = domain.defaults.combos.get(combo);
     let overrides = product.and_then(|scope| scope.combos.get(combo));
-    let mut effective = UserApiCredentials::default();
-    effective.customer_number = product
-        .and_then(|scope| scope.customer_number.as_ref())
-        .or(domain.defaults.customer_number.as_ref())
-        .cloned();
+    let mut effective = UserApiCredentials {
+        customer_number: product
+            .and_then(|scope| scope.customer_number.as_ref())
+            .or(domain.defaults.customer_number.as_ref())
+            .cloned(),
+        ..Default::default()
+    };
     for &field in combo_fields(combo)? {
         *field.get_mut(&mut effective) = overrides
             .and_then(|credentials| field.get(credentials).as_ref())
