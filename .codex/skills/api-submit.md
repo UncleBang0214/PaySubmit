@@ -24,18 +24,21 @@
 | `settings.api.save` | 保存本地密钥（值不回显） |
 | `app.exit` | 退出应用（用于启动同意书“拒绝并退出”，不涉及业务数据） |
 | `app.open_config_dir` | 在资源管理器打开本地配置目录（仅定位，不读取内容） |
+| `sm_cert.extract` | 读取 SM2/PFX 私钥与 X.509 公钥证书并转为 Base64（仅内存处理，不落盘） |
 
 ## 内置接口
 
 | 产品 | 接口 | 协议 | 所需密钥 |
 |---|---|---|---|
-| `PublicProduct` 公共产品 | 余额查询 `public.md5.balance_query` | `form_md5_fields`（MD5 + 3DES） | MD5 签名密钥（字段需加密时用 3DES 密钥） |
-| `PublicProduct` 公共产品 | 发起结算 `public.md5.settlement_apply` | `form_md5_fields`（MD5 + 3DES） | 同上 |
+| `PublicProduct` 公共产品 | 余额查询 `public.sm.balance_query` | `form_sm_sign`（SM2 签名） | 商户 SM2 私钥 + 平台 SM2 公钥 |
+| `PublicProduct` 公共产品 | 发起结算 `public.sm.settlement_apply` | `form_sm_sign`（SM2 签名） | 同上 |
 
 请求地址在 `core_config.rs` 的 `API_BALANCE_ENDPOINT` / `API_SETTLEMENT_ENDPOINT` 中固定，界面不再暴露地址编辑。
 
-余额查询请求字段：`P1_bizType=MerchantAccountQuery`、`P2_customerNumber`、`P3_timestamp`；
+余额查询请求字段：`P1_bizType=MerchantAccountQuery`、`P2_customerNumber`、`P3_timestamp`、`signType=SM3WITHSM2`；
 响应关键字段：`rt5_accountStatus`、`rt6_balance`、`rt7_frozenBalance`、`rt8_d0Balance`、`rt9_T1Balance`、`rt10_currency`。
+
+发起结算请求字段：`P1_bizType=MerchantSettlement`、`P2_orderId`、`P3_customerNumber`、`P4_amount`、`P5_summary`、`signType=SM3WITHSM2`。
 
 新增渠道接口时，必须同时确认：
 

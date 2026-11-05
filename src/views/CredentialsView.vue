@@ -2,6 +2,8 @@
 import { computed, onMounted, reactive, ref } from "vue";
 import { FolderOpen, KeyRound, LoaderCircle, Save } from "lucide-vue-next";
 
+import FilePicker from "../components/FilePicker.vue";
+import { choosePublicCertificatePath, chooseSmPrivateKeyPath } from "../dialogs";
 import { saveApiChanges, useSettings } from "../composables/useSettings";
 import type {
   ApiCombo,
@@ -13,15 +15,30 @@ import { useUi } from "../composables/useUi";
 import { rpc } from "../rpc";
 import { errorMessage } from "../utils";
 
-// 面向 C 端仅保留「公共产品」一套 3DES + MD5 密钥。
-const PRODUCT_SCOPE = "PublicProduct";
+// 面向 C 端只使用国密密钥：商户 SM2 私钥 + 平台 SM2 公钥（均为 Base64）。
 const DOMAIN: ApiDomain = "domestic";
-const COMBO: ApiCombo = "des_md5";
+const COMBO: ApiCombo = "sm";
+const SCOPE = "global";
 
 const keyFields: { key: CredentialField; label: string; hint: string }[] = [
-  { key: "triple_des_key", label: "3DES 密钥", hint: "用于请求字段的三重DES加密" },
-  { key: "md5_key", label: "MD5 密钥", hint: "用于请求参数签名" },
+  {
+    key: "sm2_private_key",
+    label: "商户 SM2 私钥",
+    hint: "Base64 编码的私钥标量，可用下方证书读取获得",
+  },
+  {
+    key: "sm2_public_key",
+    label: "平台 SM2 公钥",
+    hint: "Base64 编码的 SEC1 公钥，可用下方证书读取获得",
+  },
 ];
+
+interface ExtractResponse {
+  private_key_base64: string | null;
+  public_key_base64: string | null;
+  private_key_format: string | null;
+  public_key_format: string | null;
+}
 
 const { snapshot, saving, ensureSettings } = useSettings();
 const { notify } = useUi();
@@ -29,7 +46,14 @@ const drafts = reactive<Partial<Record<CredentialField, string>>>({});
 const busy = ref(false);
 const loading = ref(true);
 
-const summary = computed(() => snapshot.value?.products?.[PRODUCT_SCOPE]?.combos?.[COMBO]);
+const showCert = ref(false);
+const privatePath = ref("");
+const certPath = ref("");
+const password = ref("");
+const extracting = ref(false);
+
+const summary = computed(() => snapshot.value?.sm_domains?.[DOMAIN]?.combos?.[COMBO]);
+const canExtract = computed(() => Boolean(privatePath.value || certPath.value));
 
 function configured(key: CredentialField): boolean {
   const combo = summary.value;
@@ -51,7 +75,7 @@ async function save() {
   const changes: CredentialChanges = {};
   for (const field of keyFields) {
     const value = drafts[field.key];
-    if (value !== undefined && value !== "") changes[field.key] = value;
+    if (value !== undefined && value.trim() !== "") changes[field.key] = value.trim();
   }
   if (Object.keys(changes).length === 0) {
     notify("没有需要保存的密钥内容", "neutral");
@@ -59,13 +83,51 @@ async function save() {
   }
   busy.value = true;
   try {
-    await saveApiChanges(DOMAIN, COMBO, PRODUCT_SCOPE, changes, snapshot.value?.revision ?? 0);
+    await saveApiChanges(DOMAIN, COMBO, SCOPE, changes, snapshot.value?.revision ?? 0);
     for (const field of keyFields) delete drafts[field.key];
-    notify("本地密钥已加密保存");
+    notify("国密密钥已加密保存");
   } catch (error) {
     notify(errorMessage(error), "error");
   } finally {
     busy.value = false;
+  }
+}
+
+async function pickPrivate() {
+  const selected = await chooseSmPrivateKeyPath();
+  if (selected) privatePath.value = selected;
+}
+
+async function pickCert() {
+  const selected = await choosePublicCertificatePath();
+  if (selected) certPath.value = selected;
+}
+
+async function extractKeys() {
+  if (!canExtract.value) {
+    notify("请选择商户私钥或平台公钥证书文件", "error");
+    return;
+  }
+  if (privatePath.value && !password.value) {
+    notify("读取商户私钥需要填写私钥密码", "error");
+    return;
+  }
+  extracting.value = true;
+  try {
+    const result = await rpc<ExtractResponse>("sm_cert.extract", {
+      private_key_path: privatePath.value,
+      public_cert_path: certPath.value,
+      password: password.value,
+    });
+    if (result.private_key_base64) drafts.sm2_private_key = result.private_key_base64;
+    if (result.public_key_base64) drafts.sm2_public_key = result.public_key_base64;
+    notify("证书已读取，请点击保存密钥");
+    password.value = "";
+    showCert.value = false;
+  } catch (error) {
+    notify(errorMessage(error), "error");
+  } finally {
+    extracting.value = false;
   }
 }
 
@@ -86,17 +148,12 @@ async function openConfigDir() {
         <KeyRound :size="18" />
         <div>
           <h2>本地密钥</h2>
-          <span>仅保存在本机，加密存储，不回显明文</span>
+          <span>国密密钥仅保存在本机，加密存储，不回显明文</span>
         </div>
       </div>
     </header>
 
     <div class="credentials-body">
-      <div class="product-row">
-        <span class="product-label">产品</span>
-        <span class="product-value">公共产品</span>
-      </div>
-
       <div
         v-for="field in keyFields"
         :key="field.key"
@@ -107,16 +164,60 @@ async function openConfigDir() {
           <span class="key-label">{{ field.label }}</span>
           <span class="key-status">{{ configured(field.key) ? "已配置" : "未配置" }}</span>
         </div>
-        <input
+        <textarea
           v-model="drafts[field.key]"
-          type="password"
-          autocomplete="off"
+          rows="3"
           spellcheck="false"
+          autocomplete="off"
           :disabled="busy || loading"
-          :placeholder="configured(field.key) ? '留空表示不修改' : `请输入${field.label}`"
-        />
+          :placeholder="configured(field.key) ? '留空表示不修改' : `请粘贴${field.label} Base64`"
+        ></textarea>
         <span class="key-hint">{{ field.hint }}</span>
       </div>
+
+      <section class="cert-reader">
+        <button type="button" class="btn" :disabled="extracting" @click="showCert = !showCert">
+          <KeyRound :size="15" />{{ showCert ? "收起证书读取" : "读取国密证书转 Base64" }}
+        </button>
+
+        <div v-if="showCert" class="cert-panel">
+          <label class="field-label">商户私钥文件（SM2 / PFX / P12）</label>
+          <FilePicker
+            :path="privatePath"
+            label="选择商户私钥"
+            :disabled="extracting"
+            @select="pickPrivate"
+          />
+          <label class="field-label">私钥密码</label>
+          <input
+            v-model="password"
+            type="password"
+            autocomplete="off"
+            spellcheck="false"
+            placeholder="读取商户私钥需要填写密码"
+            :disabled="extracting || !privatePath"
+          />
+          <label class="field-label">平台公钥证书（CER / CRT / PEM）</label>
+          <FilePicker
+            :path="certPath"
+            label="选择平台公钥证书"
+            :disabled="extracting"
+            @select="pickCert"
+          />
+          <div class="cert-actions">
+            <button
+              type="button"
+              class="btn primary"
+              :disabled="extracting || !canExtract"
+              @click="extractKeys"
+            >
+              <LoaderCircle v-if="extracting" :size="15" class="spin" />{{
+                extracting ? "读取中" : "读取并填入"
+              }}
+            </button>
+          </div>
+        </div>
+      </section>
     </div>
 
     <footer class="surface-footer">
@@ -139,24 +240,6 @@ async function openConfigDir() {
   display: grid;
   gap: 16px;
   padding: 20px;
-}
-.product-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 12px 14px;
-  background: var(--surface-subtle);
-}
-.product-label {
-  color: var(--text-muted);
-  font-size: 13px;
-}
-.product-value {
-  color: var(--text);
-  font-size: 13px;
-  font-weight: 600;
 }
 .key-field {
   display: grid;
@@ -190,11 +273,41 @@ async function openConfigDir() {
   background: var(--success-soft);
   color: var(--success);
 }
-.key-field input {
+.key-field textarea {
   width: 100%;
+  resize: vertical;
+  font-family: var(--font-code);
+  font-size: 12px;
 }
 .key-hint {
   color: var(--text-faint);
   font-size: 11.5px;
+}
+.cert-reader {
+  display: grid;
+  gap: 12px;
+}
+.cert-reader > .btn {
+  justify-self: start;
+}
+.cert-panel {
+  display: grid;
+  gap: 8px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 14px;
+  background: var(--surface-subtle);
+}
+.field-label {
+  color: var(--text-muted);
+  font-size: 12px;
+}
+.cert-panel input {
+  width: 100%;
+}
+.cert-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 4px;
 }
 </style>

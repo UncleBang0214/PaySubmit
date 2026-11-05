@@ -1,7 +1,7 @@
 use serde_json::Value;
 use tauri::{Manager, State};
 
-use crate::{feature_api_debug, feature_settings};
+use crate::{feature_api_debug, feature_settings, feature_sm_cert};
 
 #[tauri::command]
 pub async fn invoke_action(
@@ -19,6 +19,13 @@ pub async fn invoke_action(
     // 在系统文件管理器中打开本地密钥配置目录，便于用户备份或迁移；仅定位文件夹，不读取内容。
     if action == "app.open_config_dir" {
         return open_config_dir(&app);
+    }
+
+    // 读取国密证书并转换为 Base64，供本地密钥填写；仅在内存处理，不落盘。
+    if action == "sm_cert.extract" {
+        return tauri::async_runtime::spawn_blocking(move || feature_sm_cert::extract_keys(params))
+            .await
+            .map_err(|_| "国密证书读取任务异常结束，请重试".to_string())?;
     }
 
     if matches!(

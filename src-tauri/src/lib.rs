@@ -8,6 +8,7 @@ mod feature_api_debug;
 mod feature_api_protocol;
 mod feature_api_settings;
 mod feature_settings;
+mod feature_sm_cert;
 
 use tauri::Manager;
 

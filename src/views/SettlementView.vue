@@ -37,7 +37,7 @@ async function submit() {
   busy.value = true;
   result.value = null;
   try {
-    result.value = await runApiAction("public.md5.settlement_apply", customer, {
+    result.value = await runApiAction("public.sm.settlement_apply", customer, {
       P4_amount: amountValue.toFixed(2),
     });
     notify(result.value.ok ? "结算已提交" : "结算未成功", result.value.ok ? "success" : "warning");

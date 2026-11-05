@@ -52,8 +52,8 @@ pub(crate) const API_SETTLEMENT_ENDPOINT: &str =
 /// 按内置接口 ID 返回固定请求地址；未知接口返回 None，回退到接口目录中的地址。
 pub(crate) fn builtin_endpoint(api_id: &str) -> Option<&'static str> {
     match api_id {
-        "public.md5.balance_query" => Some(API_BALANCE_ENDPOINT),
-        "public.md5.settlement_apply" => Some(API_SETTLEMENT_ENDPOINT),
+        "public.sm.balance_query" => Some(API_BALANCE_ENDPOINT),
+        "public.sm.settlement_apply" => Some(API_SETTLEMENT_ENDPOINT),
         _ => None,
     }
 }

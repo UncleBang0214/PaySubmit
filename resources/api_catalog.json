@@ -5,12 +5,12 @@
       "name": "公共产品",
       "interfaces": [
         {
-          "id": "public.md5.balance_query",
+          "id": "public.sm.balance_query",
           "name": "余额查询",
           "function": "balanceQuery",
           "request_type": "MerchantAccountQueryReq",
-          "variant": "md5",
-          "protocol": "form_md5_fields",
+          "variant": "sm",
+          "protocol": "form_sm_sign",
           "endpoint": "",
           "content_type": "form",
           "response_sign_fields": [
@@ -51,16 +51,24 @@
               "sign": true,
               "encrypt": false,
               "omit_empty": false
+            },
+            {
+              "name": "signType",
+              "kind": "string",
+              "default": "SM3WITHSM2",
+              "sign": true,
+              "encrypt": false,
+              "omit_empty": false
             }
           ]
         },
         {
-          "id": "public.md5.settlement_apply",
+          "id": "public.sm.settlement_apply",
           "name": "发起结算",
           "function": "merchantSettlementApply",
           "request_type": "MerchantSettlementApplyReq",
-          "variant": "md5",
-          "protocol": "form_md5_fields",
+          "variant": "sm",
+          "protocol": "form_sm_sign",
           "endpoint": "",
           "content_type": "form",
           "response_sign_fields": [
@@ -115,8 +123,8 @@
             {
               "name": "signType",
               "kind": "string",
-              "default": "MD5",
-              "sign": false,
+              "default": "SM3WITHSM2",
+              "sign": true,
               "encrypt": false,
               "omit_empty": false
             }

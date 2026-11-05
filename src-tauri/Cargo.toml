@@ -25,6 +25,7 @@ rsa = "0.9"
 rand = "0.8"
 x509-cert = "0.3"
 yasna = "0.6"
+p12-keystore = "0.4"
 sm3 = { version = "0.5", features = ["zeroize"] }
 sm4 = { version = "0.6", features = ["zeroize"] }
 cbc = { version = "0.2", features = ["alloc", "zeroize"] }
