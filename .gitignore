@@ -1,0 +1,13 @@
+/.idea/
+/dist/
+node_modules/
+src-tauri/target/
+*.log
+
+# 用户本地密钥与配置不得进入版本控制。
+user_settings.json
+.user_settings.lock
+.user_settings-*.tmp
+
+# Tauri 生成物
+src-tauri/gen/

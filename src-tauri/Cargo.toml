@@ -1,0 +1,45 @@
+[package]
+name = "paysubmit"
+version = "0.1.0"
+description = "PaySubmit - local payment request submitter"
+authors = ["PaySubmit"]
+edition = "2021"
+
+[lib]
+name = "paysubmit_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2.4.1", features = [] }
+
+[dependencies]
+tauri = { version = "2.8.0", features = [] }
+tauri-plugin-dialog = "2.4.0"
+serde = { version = "1", features = ["derive"] }
+serde_json = { version = "1", features = ["preserve_order"] }
+reqwest = { version = "0.12", default-features = false, features = ["blocking", "rustls-tls", "multipart", "json"] }
+uuid = { version = "1", features = ["v4"] }
+base64 = "0.22"
+urlencoding = "2"
+rsa = "0.9"
+rand = "0.8"
+x509-cert = "0.3"
+yasna = "0.6"
+sm3 = { version = "0.5", features = ["zeroize"] }
+sm4 = { version = "0.6", features = ["zeroize"] }
+cbc = { version = "0.2", features = ["alloc", "zeroize"] }
+zeroize = "1"
+aes = "0.8"
+des = "0.8"
+md-5 = { version = "0.10", features = ["oid"] }
+sha2 = "0.10"
+sm2 = "0.14"
+hex = "0.4"
+chrono = "0.4"
+tempfile = "3.27"
+
+[target.'cfg(windows)'.dependencies]
+windows-sys = { version = "0.61.2", features = ["Win32_Foundation", "Win32_Security_Cryptography", "Win32_Storage_FileSystem", "Win32_System_IO", "Win32_UI_Shell"] }
+
+[features]
+custom-protocol = ["tauri/custom-protocol"]

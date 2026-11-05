@@ -1,0 +1,40 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "PaySubmit",
+  "version": "0.1.0",
+  "identifier": "com.paysubmit.app",
+  "build": {
+    "beforeDevCommand": "npm run dev",
+    "devUrl": "http://localhost:1420",
+    "beforeBuildCommand": "npm run build",
+    "frontendDist": "target/web"
+  },
+  "app": {
+    "windows": [
+      {
+        "label": "main",
+        "title": "支付提交器",
+        "width": 1200,
+        "height": 750,
+        "minWidth": 1000,
+        "minHeight": 620,
+        "resizable": true,
+        "fullscreen": false
+      }
+    ],
+    "security": {
+      "csp": null
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": ["nsis"],
+    "icon": ["icons/icon.ico"],
+    "windows": {
+      "nsis": {
+        "languages": ["SimpChinese"],
+        "displayLanguageSelector": false
+      }
+    }
+  }
+}
