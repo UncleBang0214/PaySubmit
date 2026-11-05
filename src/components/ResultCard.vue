@@ -1,9 +1,12 @@
 <script setup lang="ts">
+import { ref } from "vue";
 import { CircleCheck, CircleX } from "lucide-vue-next";
 
 import type { ActionResult } from "../composables/useApiAction";
 
 defineProps<{ result: ActionResult }>();
+
+const showRaw = ref(false);
 </script>
 
 <template>
@@ -29,10 +32,12 @@ defineProps<{ result: ActionResult }>();
       未获取到可展示的返回信息（HTTP {{ result.status }}）
     </p>
 
-    <details v-if="result.rawBody" class="raw-toggle">
-      <summary>查看原始响应</summary>
-      <pre class="raw-body">{{ result.rawBody }}</pre>
-    </details>
+    <div v-if="result.rawBody" class="raw-toggle">
+      <button type="button" class="raw-toggle-btn" @click="showRaw = !showRaw">
+        {{ showRaw ? "收起原始返回" : "查看合利宝服务端原始返回" }}
+      </button>
+      <pre v-if="showRaw" class="raw-body">{{ result.rawBody }}</pre>
+    </div>
   </section>
 </template>
 
@@ -115,11 +120,16 @@ defineProps<{ result: ActionResult }>();
   border-top: 1px dashed var(--border);
   padding-top: 10px;
 }
-.raw-toggle summary {
+.raw-toggle-btn {
+  border: 0;
+  padding: 0;
+  background: transparent;
   color: var(--text-muted);
   font-size: 12px;
   cursor: pointer;
-  user-select: none;
+}
+.raw-toggle-btn:hover {
+  color: var(--accent);
 }
 .raw-body {
   max-height: 240px;
