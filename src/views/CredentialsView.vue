@@ -301,9 +301,27 @@ async function openConfigDir() {
 }
 .key-field textarea {
   width: 100%;
+  min-height: 78px;
   resize: vertical;
+  border: 1px solid var(--border-strong);
+  border-radius: 6px;
+  padding: 10px 12px;
+  background: var(--surface);
+  color: var(--text);
   font-family: var(--font-code);
-  font-size: 12px;
+  font-size: 12.5px;
+  line-height: 1.6;
+  transition:
+    border-color 0.16s ease,
+    background-color 0.16s ease,
+    box-shadow 0.16s ease;
+}
+.key-field textarea:hover:not(:disabled) {
+  border-color: color-mix(in srgb, var(--accent) 45%, var(--border-strong));
+}
+.key-field textarea:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--focus);
 }
 .key-hint {
   color: var(--text-faint);
