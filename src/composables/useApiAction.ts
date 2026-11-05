@@ -50,7 +50,7 @@ const SETTLEMENT_FIELD_LABELS: Record<string, string> = {
   rt6_serialNumber: "流水号",
 };
 
-const SUCCESS_CODES = new Set(["0000", "000000", "SUCCESS", "0"]);
+const SUCCESS_CODE = "0000";
 
 function flatten(value: unknown, out: Record<string, string>) {
   if (value === null || value === undefined) return;
@@ -116,8 +116,13 @@ export async function runApiAction(
   if (Object.keys(flat).length === 0) flatten(raw.response.body, flat);
 
   const retCode = flat["rt2_retCode"] ?? "";
-  const message = flat["rt3_retMsg"] ?? flat["rt12_desc"] ?? "";
-  const ok = raw.response.success && (retCode ? SUCCESS_CODES.has(retCode) : true);
+  // 合利宝服务端业务成功唯一标志是 rt2_retCode=0000；缺失或其它值均视为未受理成功。
+  const ok = raw.response.success && retCode === SUCCESS_CODE;
+  let message = flat["rt3_retMsg"] ?? flat["rt12_desc"] ?? "";
+  if (!message && Object.keys(flat).length === 0) {
+    const body = raw.response.body.trim();
+    if (body && !body.startsWith("BASE64:")) message = body.slice(0, 200);
+  }
 
   const fieldLabels = apiId.includes("balance") ? BALANCE_FIELD_LABELS : SETTLEMENT_FIELD_LABELS;
   const items: ResultItem[] = [];
