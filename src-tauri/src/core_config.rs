@@ -48,6 +48,9 @@ pub(crate) const API_BALANCE_ENDPOINT: &str =
     "https://pay.trx.helipay.com/trx/merchant/interface.action";
 pub(crate) const API_SETTLEMENT_ENDPOINT: &str =
     "https://transfer.trx.helipay.com/trx/transfer/interface.action";
+// 商户入驻-变更结算信息（multipart 上传）
+pub(crate) const API_MERCHANT_ENTRY_UPLOAD_ENDPOINT: &str =
+    "https://entry.trx.helipay.com/trx/merchantEntry/upload.action";
 
 /// 按内置接口 ID 返回固定请求地址；未知接口返回 None，回退到接口目录中的地址。
 pub(crate) fn builtin_endpoint(api_id: &str) -> Option<&'static str> {

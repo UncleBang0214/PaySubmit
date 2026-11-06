@@ -136,3 +136,27 @@ export async function runApiAction(
 
   return { ok, status: raw.response.status, retCode, message, items, rawBody: raw.response.body };
 }
+
+interface ModifySettleRaw {
+  ok: boolean;
+  code: string;
+  message: string;
+  result: string;
+  raw: string;
+  http_status: number;
+}
+
+/** 变更结算信息（国密 multipart），返回归一化结果。 */
+export async function runModifySettle(params: Record<string, unknown>): Promise<ActionResult> {
+  const raw = await rpc<ModifySettleRaw>("merchant.modify_settle", params);
+  const items: ResultItem[] = [];
+  if (raw.result) items.push({ label: "处理结果", value: raw.result });
+  return {
+    ok: raw.ok,
+    status: raw.http_status ?? 200,
+    retCode: raw.code ?? "",
+    message: raw.message ?? "",
+    items,
+    rawBody: raw.raw ?? "",
+  };
+}

@@ -56,7 +56,11 @@ const password = ref("");
 const extracting = ref(false);
 
 const summary = computed(() => snapshot.value?.sm_domains?.domestic?.combos?.sm);
+const parentConfigured = computed(() =>
+  Boolean(snapshot.value?.sm_domains?.domestic?.customer_number?.trim()),
+);
 const canExtract = computed(() => Boolean(privatePath.value || certPath.value));
+const parentNo = ref("");
 
 function configured(field: KeyFieldDef): boolean {
   if (field.kind === "md5") {
@@ -67,7 +71,8 @@ function configured(field: KeyFieldDef): boolean {
 
 onMounted(async () => {
   try {
-    await ensureSettings();
+    const loaded = await ensureSettings();
+    parentNo.value = loaded?.sm_domains?.domestic?.customer_number ?? "";
   } catch (error) {
     notify(errorMessage(error), "error");
   } finally {
@@ -84,8 +89,11 @@ async function save() {
   if (md5Value) md5Changes.md5_key = md5Value;
   if (smPrivate) smChanges.sm2_private_key = smPrivate;
   if (smPublic) smChanges.sm2_public_key = smPublic;
+  const currentParent = snapshot.value?.sm_domains?.domestic?.customer_number ?? "";
+  const parentValue = parentNo.value.trim();
+  if (parentValue && parentValue !== currentParent) smChanges.customer_number = parentValue;
   if (Object.keys(md5Changes).length === 0 && Object.keys(smChanges).length === 0) {
-    notify("没有需要保存的密钥内容", "neutral");
+    notify("没有需要保存的内容", "neutral");
     return;
   }
   busy.value = true;
@@ -101,7 +109,7 @@ async function save() {
     delete drafts.md5_key;
     delete drafts.sm2_private_key;
     delete drafts.sm2_public_key;
-    notify("本地密钥已加密保存");
+    notify("设置已加密保存");
   } catch (error) {
     notify(errorMessage(error), "error");
   } finally {
@@ -163,13 +171,28 @@ async function openConfigDir() {
       <div class="section-title">
         <KeyRound :size="18" />
         <div>
-          <h2>本地密钥</h2>
-          <span>密钥仅保存在本机，加密存储，不回显明文</span>
+          <h2>设置</h2>
+          <span>平台商编号与国密密钥，仅保存在本机</span>
         </div>
       </div>
     </header>
 
     <div class="credentials-body">
+      <div class="key-field" :class="{ configured: parentConfigured }">
+        <div class="key-head">
+          <span class="key-label">平台商商户编号</span>
+          <span class="key-status">{{ parentConfigured ? "已配置" : "未配置" }}</span>
+        </div>
+        <input
+          v-model="parentNo"
+          autocomplete="off"
+          spellcheck="false"
+          :disabled="busy || loading"
+          placeholder="请输入平台商商户编号（C 开头）"
+        />
+        <span class="key-hint">变更结算信息等底层商户接口的调用身份与签名使用</span>
+      </div>
+
       <div
         v-for="field in keyFields"
         :key="field.key"

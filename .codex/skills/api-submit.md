@@ -25,6 +25,7 @@
 | `app.exit` | 退出应用（用于启动同意书“拒绝并退出”，不涉及业务数据） |
 | `app.open_config_dir` | 在资源管理器打开本地配置目录（仅定位，不读取内容） |
 | `sm_cert.extract` | 读取 SM2/PFX 私钥与 X.509 公钥证书并转为 Base64（仅内存处理，不落盘） |
+| `merchant.modify_settle` | 变更子商户结算信息（modifyMerchantInfoV2，国密 multipart；需平台商编号与 SM2 密钥） |
 
 ## 内置接口
 

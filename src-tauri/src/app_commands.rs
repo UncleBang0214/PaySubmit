@@ -1,7 +1,7 @@
 use serde_json::Value;
 use tauri::{Manager, State};
 
-use crate::{feature_api_debug, feature_settings, feature_sm_cert};
+use crate::{feature_api_debug, feature_merchant_entry, feature_settings, feature_sm_cert};
 
 #[tauri::command]
 pub async fn invoke_action(
@@ -26,6 +26,16 @@ pub async fn invoke_action(
         return tauri::async_runtime::spawn_blocking(move || feature_sm_cert::extract_keys(params))
             .await
             .map_err(|_| "国密证书读取任务异常结束，请重试".to_string())?;
+    }
+
+    // 商户入驻-变更结算信息（国密 multipart）。
+    if action == "merchant.modify_settle" {
+        let settings = settings.inner().clone();
+        return tauri::async_runtime::spawn_blocking(move || {
+            feature_merchant_entry::modify_settle_info(params, &settings.store()?)
+        })
+        .await
+        .map_err(|_| "变更结算信息任务异常结束，请重试".to_string())?;
     }
 
     if matches!(

@@ -2,6 +2,13 @@ import type { ModuleDefinition } from "./types";
 
 export const MODULES: ModuleDefinition[] = [
   {
+    key: "modify",
+    label: "变更结算信息",
+    description: "修改子商户的结算卡与结算配置",
+    group: "workspace",
+    icon: "edit",
+  },
+  {
     key: "balance",
     label: "余额查询",
     description: "输入商户编号，查询账户余额",
@@ -17,8 +24,8 @@ export const MODULES: ModuleDefinition[] = [
   },
   {
     key: "credentials",
-    label: "本地密钥",
-    description: "加密保存签名密钥，仅存本机",
+    label: "设置",
+    description: "平台商编号与国密密钥，仅存本机",
     group: "workspace",
     icon: "certificate",
   },

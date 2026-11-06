@@ -14,6 +14,7 @@ import { rpc } from "./rpc";
 import type { ModuleDefinition, ModuleKey } from "./types";
 import BalanceView from "./views/BalanceView.vue";
 import CredentialsView from "./views/CredentialsView.vue";
+import ModifySettleView from "./views/ModifySettleView.vue";
 import SettlementView from "./views/SettlementView.vue";
 
 const active = ref<ModuleKey>("balance");
@@ -36,6 +37,7 @@ async function onConsentRefuse() {
 }
 
 const views = {
+  modify: ModifySettleView,
   balance: BalanceView,
   settlement: SettlementView,
   credentials: CredentialsView,
