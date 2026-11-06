@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { Component } from "vue";
-import { Banknote, FilePen, KeyRound, Moon, Sun, Wallet } from "lucide-vue-next";
+import { Banknote, FilePen, Moon, Settings as SettingsIcon, Sun, Wallet } from "lucide-vue-next";
 
 import { MODULE_GROUPS, MODULES } from "../modules";
 import type { ModuleDefinition, ModuleKey } from "../types";
@@ -12,7 +12,7 @@ const icons: Record<ModuleDefinition["icon"], Component> = {
   edit: FilePen,
   wallet: Wallet,
   banknote: Banknote,
-  certificate: KeyRound,
+  certificate: SettingsIcon,
 };
 </script>
 
