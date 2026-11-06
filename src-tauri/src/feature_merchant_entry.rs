@@ -25,6 +25,14 @@ struct ModifySettleParams {
     bank_code: String,
     merchant_entry_alteration_type: String,
     #[serde(default)]
+    update_account_name: String,
+    #[serde(default)]
+    update_account_no: String,
+    #[serde(default)]
+    update_settle_bank_type: String,
+    #[serde(default)]
+    update_bank_code: String,
+    #[serde(default)]
     settle_mode: String,
     #[serde(default)]
     settlement_mode: String,
@@ -144,6 +152,13 @@ fn build_request_data(
         json!(params.merchant_entry_alteration_type.trim()),
     );
     for (key, value) in [
+        ("updateAccountName", params.update_account_name.trim()),
+        ("updateAccountNo", params.update_account_no.trim()),
+        (
+            "updateSettleBankType",
+            params.update_settle_bank_type.trim(),
+        ),
+        ("updateBankCode", params.update_bank_code.trim()),
         ("settleMode", params.settle_mode.trim()),
         ("settlementMode", params.settlement_mode.trim()),
         ("settlementPeriod", params.settlement_period.trim()),

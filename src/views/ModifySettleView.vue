@@ -11,37 +11,42 @@ import { useUi } from "../composables/useUi";
 import { errorMessage } from "../utils";
 
 const alterationOptions = [
-  { value: "SETTLE_BANKCARD", label: "结算卡变更" },
-  { value: "MERCHANT_INFO", label: "商户信息变更" },
-];
-const bankTypeOptions = [
-  { value: "TOPRIVATE", label: "对私" },
-  { value: "TOPUBLIC", label: "对公" },
-];
-const settleModeOptions = [
-  { value: "MERCHANT", label: "商户结算" },
-  { value: "PLATFORM", label: "平台结算" },
-];
-const settleTypeOptions = [
-  { value: "SELF", label: "自主结算" },
-  { value: "AUTO", label: "自动结算" },
+  { value: "SETTLE_BANKCARD", label: "变更结算卡" },
+  { value: "MERCHANT_INFO", label: "变更商户信息" },
+  { value: "MERCHANT_CREDENTIAL", label: "变更资质" },
+  { value: "MERCHANT_INFO_SYN", label: "商户信息变更查询" },
 ];
 const periodOptions = [
-  { value: "T1", label: "T1" },
-  { value: "D0", label: "D0" },
-  { value: "S0", label: "S0" },
+  { value: "", label: "请选择" },
+  { value: "T1", label: "次工作日（T1）" },
+  { value: "D1", label: "次日（D1）" },
+  { value: "D0", label: "当日（D0）" },
+];
+const bankTypeOptions = [
+  { value: "", label: "请选择" },
+  { value: "TOPUBLIC", label: "对公" },
+  { value: "TOPRIVATE", label: "对私" },
+];
+const settleModeOptions = [
+  { value: "", label: "请选择" },
+  { value: "NOTOPEN", label: "不开通" },
+  { value: "AUTO", label: "自动结算" },
+  { value: "SELF", label: "自主结算" },
 ];
 
 const form = reactive({
   merchantNo: "",
   merchantEntryAlterationType: "SETTLE_BANKCARD",
+  settlementPeriod: "",
   accountName: "",
+  updateAccountName: "",
   accountNo: "",
-  settleBankType: "TOPRIVATE",
+  updateAccountNo: "",
+  settleBankType: "",
+  updateSettleBankType: "",
   bankCode: "",
-  settleMode: "MERCHANT",
-  settlementMode: "SELF",
-  settlementPeriod: "T1",
+  updateBankCode: "",
+  settlementMode: "",
 });
 
 const busy = ref(false);
@@ -67,9 +72,10 @@ async function submit() {
     return;
   }
   for (const [value, label] of [
-    [form.accountName, "结算账户名"],
-    [form.accountNo, "结算账号"],
-    [form.bankCode, "银行编码"],
+    [form.accountName, "原账户名称"],
+    [form.accountNo, "原结算卡号"],
+    [form.settleBankType, "原结算卡类型"],
+    [form.bankCode, "原联行号"],
   ] as [string, string][]) {
     if (!value.trim()) {
       notify(`请填写${label}`, "error");
@@ -79,7 +85,7 @@ async function submit() {
 
   const confirmed = await confirm(
     "确认变更结算信息",
-    `子商户编号：${form.merchantNo.trim()}\n账户名：${form.accountName.trim()}\n结算账号：${form.accountNo.trim()}\n\n该操作会变更子商户的结算信息，请确认无误。`,
+    `子商户编号：${form.merchantNo.trim()}\n原账户名：${form.accountName.trim()}\n原结算卡号：${form.accountNo.trim()}\n\n该操作会变更子商户的结算信息，请确认无误。`,
     "确认变更",
   );
   if (!confirmed) return;
@@ -89,14 +95,17 @@ async function submit() {
   try {
     result.value = await runModifySettle({
       merchant_no: form.merchantNo.trim(),
-      account_name: form.accountName.trim(),
-      account_no: form.accountNo.trim(),
-      settle_bank_type: form.settleBankType,
-      bank_code: form.bankCode.trim(),
       merchant_entry_alteration_type: form.merchantEntryAlterationType,
-      settle_mode: form.settleMode,
-      settlement_mode: form.settlementMode,
       settlement_period: form.settlementPeriod,
+      account_name: form.accountName.trim(),
+      update_account_name: form.updateAccountName.trim(),
+      account_no: form.accountNo.trim(),
+      update_account_no: form.updateAccountNo.trim(),
+      settle_bank_type: form.settleBankType,
+      update_settle_bank_type: form.updateSettleBankType,
+      bank_code: form.bankCode.trim(),
+      update_bank_code: form.updateBankCode.trim(),
+      settlement_mode: form.settlementMode,
     });
     notify(result.value.ok ? "变更已提交" : "变更未成功", result.value.ok ? "success" : "warning");
   } catch (error) {
@@ -131,68 +140,11 @@ async function submit() {
         />
       </label>
       <label class="field">
-        <span>变更类型</span>
+        <span>变更类型<span class="req">*</span></span>
         <SelectControl
           v-model="form.merchantEntryAlterationType"
           :options="alterationOptions"
           aria-label="变更类型"
-          :disabled="busy"
-        />
-      </label>
-      <label class="field">
-        <span>结算账户名</span>
-        <input
-          v-model="form.accountName"
-          autocomplete="off"
-          spellcheck="false"
-          placeholder="请输入结算账户名"
-          :disabled="busy"
-        />
-      </label>
-      <label class="field">
-        <span>结算账号</span>
-        <input
-          v-model="form.accountNo"
-          autocomplete="off"
-          spellcheck="false"
-          placeholder="请输入结算银行卡号"
-          :disabled="busy"
-        />
-      </label>
-      <label class="field">
-        <span>账户类型</span>
-        <SelectControl
-          v-model="form.settleBankType"
-          :options="bankTypeOptions"
-          aria-label="账户类型"
-          :disabled="busy"
-        />
-      </label>
-      <label class="field">
-        <span>银行编码</span>
-        <input
-          v-model="form.bankCode"
-          autocomplete="off"
-          spellcheck="false"
-          placeholder="请输入银行编码"
-          :disabled="busy"
-        />
-      </label>
-      <label class="field">
-        <span>结算模式</span>
-        <SelectControl
-          v-model="form.settleMode"
-          :options="settleModeOptions"
-          aria-label="结算模式"
-          :disabled="busy"
-        />
-      </label>
-      <label class="field">
-        <span>结算方式</span>
-        <SelectControl
-          v-model="form.settlementMode"
-          :options="settleTypeOptions"
-          aria-label="结算方式"
           :disabled="busy"
         />
       </label>
@@ -202,6 +154,93 @@ async function submit() {
           v-model="form.settlementPeriod"
           :options="periodOptions"
           aria-label="结算周期"
+          :disabled="busy"
+        />
+      </label>
+      <label class="field">
+        <span>原账户名称<span class="req">*</span></span>
+        <input
+          v-model="form.accountName"
+          autocomplete="off"
+          spellcheck="false"
+          placeholder="请输入原结算账户名"
+          :disabled="busy"
+        />
+      </label>
+      <label class="field">
+        <span>变更后账户名称</span>
+        <input
+          v-model="form.updateAccountName"
+          autocomplete="off"
+          spellcheck="false"
+          placeholder="留空表示不修改"
+          :disabled="busy"
+        />
+      </label>
+      <label class="field">
+        <span>原结算卡号<span class="req">*</span></span>
+        <input
+          v-model="form.accountNo"
+          autocomplete="off"
+          spellcheck="false"
+          placeholder="请输入原结算银行卡号"
+          :disabled="busy"
+        />
+      </label>
+      <label class="field">
+        <span>变更后结算卡号</span>
+        <input
+          v-model="form.updateAccountNo"
+          autocomplete="off"
+          spellcheck="false"
+          placeholder="留空表示不修改"
+          :disabled="busy"
+        />
+      </label>
+      <label class="field">
+        <span>原结算卡类型<span class="req">*</span></span>
+        <SelectControl
+          v-model="form.settleBankType"
+          :options="bankTypeOptions"
+          aria-label="原结算卡类型"
+          :disabled="busy"
+        />
+      </label>
+      <label class="field">
+        <span>变更后结算卡类型</span>
+        <SelectControl
+          v-model="form.updateSettleBankType"
+          :options="bankTypeOptions"
+          aria-label="变更后结算卡类型"
+          :disabled="busy"
+        />
+      </label>
+      <label class="field">
+        <span>原联行号<span class="req">*</span></span>
+        <input
+          v-model="form.bankCode"
+          autocomplete="off"
+          spellcheck="false"
+          placeholder="请输入原银行联行号"
+          :disabled="busy"
+        />
+      </label>
+      <label class="field">
+        <span>变更后联行号</span>
+        <input
+          v-model="form.updateBankCode"
+          autocomplete="off"
+          spellcheck="false"
+          placeholder="留空表示不修改"
+          :disabled="busy"
+        />
+      </label>
+      <label class="field">
+        <span>结算方式</span>
+        <SelectControl
+          v-model="form.settlementMode"
+          :options="settleModeOptions"
+          aria-label="结算方式"
           :disabled="busy"
         />
       </label>
@@ -220,13 +259,17 @@ async function submit() {
 
 <style scoped>
 .action-surface {
-  max-width: 820px;
+  max-width: 880px;
 }
 .action-body {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 14px;
   padding: 20px;
+}
+.req {
+  margin-left: 2px;
+  color: var(--danger);
 }
 @media (max-width: 720px) {
   .action-body {
